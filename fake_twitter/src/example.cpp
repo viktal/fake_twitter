@@ -3,18 +3,27 @@
 #include <pistache/http.h>
 #include <pistache/router.h>
 #include <pistache/endpoint.h>
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
 
+#include "fake_twitter/model/User.h"
+#include <rapidjson/rapidjson.h>
+#include "fake_twitter/serializer/json.h"
 
-using namespace std;
+#include <sqlpp11/custom_query.h>
+#include <sqlpp11/sqlite3/sqlite3.h>
+#include <sqlpp11/sqlpp11.h>
+#include <sqlite3.h>
+
+#include "fake_twitter/sqlpp_models/UsersTab.h"
+
 using namespace Pistache;
+namespace sql = sqlpp::sqlite3;
 
 class StatsEndpoint {
 public:
-    explicit StatsEndpoint(Address addr)
-            : httpEndpoint(std::make_shared<Http::Endpoint>(addr)) {}
+    explicit StatsEndpoint(Address addr, sql::connection_config config) {
+        httpEndpoint = std::make_shared<Http::Endpoint>(addr);
+        db = std::make_unique<sql::connection>(config);
+    }
 
     void init(size_t thr = 2) {
         auto opts = Http::Endpoint::options()
@@ -36,45 +45,29 @@ public:
 private:
     void handleReady(const Rest::Request &, Http::ResponseWriter response) {
         using namespace rapidjson;
-//        const char *json = R"{
-//                "id": 6253282,
-//                "name": "Twitter API",
-//                "username": "TwitterAPI",
-//                "followers_count": 6133636,
-//                "friends_count": 12,
-//                "avatar": "/path/",
-//                "password_hash": "hash"
-//        }"
-        Document d;
-        d.SetObject();
-        rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+        using namespace fake_twitter;
+        using fake_twitter::sqlpp_models::TabUsers;
 
-        d.AddMember("id", 6253282, d.GetAllocator());
-        d.AddMember("name", "Twitter API", allocator);
-        d.AddMember("username", "TwitterAPI", allocator);
-        d.AddMember("followers_count", 6133636, allocator);
-        d.AddMember("friends_count", 12, allocator);
-        d.AddMember("avatar", "/path/", allocator);
-        d.AddMember("password_hash", "hash", allocator);
+        TabUsers tab;
+        auto result = (*db)(select(all_of(tab)).from(tab)
+                                    .where(tab.id == 1 ));
+        if (result.empty()) {
+            response.send(Http::Code::No_Content);
+            return;
+        }
 
+        auto& first = result.front();
+        model::User user = {first.id.value(), first.name.value(), first.username.value(), first.password_hash.value()};
 
-//        d.Parse(json);
-
-        // 2. Modify it by DOM.
-//        Value &s = d["stars"];
-//        s.SetInt(s.GetInt() + 1);
-
-        // 3. Stringify the DOM
-        StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
-        d.Accept(writer);
         response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
-        response.send(Http::Code::Ok, buffer.GetString());
+        response.send(Http::Code::Ok, serialization::to_json(user));
 
     }
 
     std::shared_ptr<Http::Endpoint> httpEndpoint;
     Rest::Router router;
+
+    std::unique_ptr<sql::connection> db;
 
 };
 
@@ -92,10 +85,18 @@ int main(int argc, char *argv[]) {
 
     Address addr(Ipv4::any(), port);
 
-    cout << "Cores = " << hardware_concurrency() << endl;
-    cout << "Using " << thr << " threads" << endl;
+//    cout << "Cores = " << hardware_concurrency() << endl;
+//    cout << "Using " << thr << " threads" << endl;
 
-    StatsEndpoint stats(addr);
+    std::cout << "Start server" << std::endl;
+
+    sql::connection_config config;
+//    config.path_to_database = ":memory:";
+    config.path_to_database = "/tmp/db.sqlite";
+    config.flags = SQLITE_OPEN_READWRITE;
+    config.debug = true;
+
+    StatsEndpoint stats(addr, config);
     stats.init(thr);
     stats.start();
 }

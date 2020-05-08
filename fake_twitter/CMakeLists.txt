@@ -1,6 +1,7 @@
 add_executable(example src/example.cpp)
-add_executable(example_rapid src/example_rapid.cpp)
-target_include_directories(example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/pistache/include/)
-target_link_libraries(example pistache_shared rapidjson)
+target_include_directories(example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/pistache/include/ include)
+target_link_libraries(example pistache_shared rapidjson sqlpp11 sqlpp11-connector-sqlite3)
 
-target_link_libraries(example_rapid rapidjson)
+add_executable(fake_db src/fake_db.cpp)
+target_include_directories(fake_db PRIVATE include)
+target_link_libraries(fake_db sqlpp11-connector-sqlite3)
