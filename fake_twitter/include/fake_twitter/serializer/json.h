@@ -1,12 +1,12 @@
 #pragma once
 
-//#include "fake_twitter/model/User.h"
+#include "fake_twitter/model/User.h"
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <fake_twitter/model/Tweet.h>
 
-namespace fake_twitter {
-namespace serialization {
+namespace fake_twitter::serialization {
 
     std::string to_json(model::User user) {
         using namespace rapidjson;
@@ -30,6 +30,27 @@ namespace serialization {
         return buffer.GetString();
     }
 
-} //serialization
+    std::string to_json(model::Tweet tweet) {
+        using namespace rapidjson;
+
+        Document d;
+        d.SetObject();
+        rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+        d.AddMember("id", tweet.id, allocator);
+        d.AddMember("name", Value().SetString(StringRef(tweet.body.c_str())), allocator);
+        d.AddMember("author", tweet.author, allocator);
+        d.AddMember("create_date", Value().SetString(StringRef(tweet.create_date.c_str())), allocator);
+        d.AddMember("retweets", tweet.retweets, allocator);
+        d.AddMember("rating", tweet.rating, allocator);
+
+        StringBuffer buffer;
+        Writer<StringBuffer> writer(buffer);
+        d.Accept(writer);
+
+//        return "";
+        return buffer.GetString();
+    }
+
 } //fake_twitter
 

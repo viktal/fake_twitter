@@ -5,6 +5,8 @@
 #include <pistache/endpoint.h>
 
 #include "fake_twitter/model/User.h"
+#include "fake_twitter/model/Tweet.h"
+
 #include <rapidjson/rapidjson.h>
 #include "fake_twitter/serializer/json.h"
 
@@ -14,6 +16,8 @@
 #include <sqlite3.h>
 
 #include "fake_twitter/sqlpp_models/UsersTab.h"
+#include "fake_twitter/sqlpp_models/TweetsTab.h"
+
 
 using namespace Pistache;
 namespace sql = sqlpp::sqlite3;
@@ -27,7 +31,8 @@ public:
 
     void init(size_t thr = 2) {
         auto opts = Http::Endpoint::options()
-                .threads(static_cast<int>(thr));
+                .threads(static_cast<int>(thr))
+                .flags(Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
         httpEndpoint->init(opts);
         setupRoutes();
     }
@@ -39,20 +44,30 @@ public:
 
     void setupRoutes() {
         using namespace Rest;
-        Routes::Get(router, "/0.0/users/show.json", Routes::bind(&StatsEndpoint::handleReady, this));
+        Routes::Get(router, "/0.0/users/show.json", Routes::bind(&StatsEndpoint::userShow, this));
+        Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&StatsEndpoint::tweetShow, this));
     }
 
 private:
-    void handleReady(const Rest::Request &, Http::ResponseWriter response) {
+    void userShow(const Rest::Request &request, Http::ResponseWriter response) {
         using namespace rapidjson;
+
         using namespace fake_twitter;
         using fake_twitter::sqlpp_models::TabUsers;
 
+        auto id_optional = request.query().get("id");
+        if (id_optional.isEmpty())
+        {
+            response.send(Http::Code::Bad_Request, "No id parameter");
+            return;
+        }
+        auto id = std::stol(id_optional.get());
+
         TabUsers tab;
         auto result = (*db)(select(all_of(tab)).from(tab)
-                                    .where(tab.id == 1 ));
+                                    .where(tab.id == id));
         if (result.empty()) {
-            response.send(Http::Code::No_Content);
+            response.send(Http::Code::Bad_Request, "No user with this id");
             return;
         }
 
@@ -64,6 +79,36 @@ private:
 
     }
 
+    void tweetShow(const Rest::Request &request, Http::ResponseWriter response) {
+        using namespace rapidjson;
+
+        using namespace fake_twitter;
+        using fake_twitter::sqlpp_models::TabTweets;
+
+        auto id_optional = request.query().get("id");
+        if (id_optional.isEmpty())
+        {
+            response.send(Http::Code::Bad_Request, "No id parameter");
+            return;
+        }
+        auto id = std::stol(id_optional.get());
+
+        TabTweets tab;
+        auto result = (*db)(select(all_of(tab)).from(tab)
+                                    .where(tab.id == id));
+        if (result.empty()) {
+            response.send(Http::Code::Bad_Request, "No tweet with this id");
+            return;
+        }
+
+        auto& first = result.front();
+        model::Tweet tweet = {first.id.value(), first.body.value(), first.author.value()};
+
+        response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+        response.send(Http::Code::Ok, serialization::to_json(tweet));
+
+    }
+
     std::shared_ptr<Http::Endpoint> httpEndpoint;
     Rest::Router router;
 
@@ -72,7 +117,7 @@ private:
 };
 
 int main(int argc, char *argv[]) {
-    Port port(9081);
+    Port port(9080);
 
     int thr = 2;
 

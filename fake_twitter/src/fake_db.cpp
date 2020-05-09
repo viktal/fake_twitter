@@ -3,6 +3,7 @@
 #include <sqlpp11/sqlpp11.h>
 
 #include "fake_twitter/sqlpp_models/UsersTab.h"
+#include "fake_twitter/sqlpp_models/TweetsTab.h"
 
 #ifdef SQLPP_USE_SQLCIPHER
 #include <sqlcipher/sqlite3.h>
@@ -18,6 +19,7 @@
 
 namespace sql = sqlpp::sqlite3;
 using fake_twitter::sqlpp_models::TabUsers;
+using fake_twitter::sqlpp_models::TabTweets;
 
 int main() {
     sql::connection_config config;
@@ -38,17 +40,25 @@ int main() {
                "\tfriends_count integer\n"
                ");\n");
 
-    TabUsers tab;
-    // explicit all_of(tab)
-    db(insert_into(tab).set(
-            tab.name = "twitter",
-            tab.username = "twitter",
-            tab.password_hash = 123,
-            tab.friends_count = 0,
-            tab.followers_count = 0,
-            tab.avatar = "path"));
+    db.execute("CREATE TABLE Tweets (\n"
+               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
+               "\tbody string,\n"
+               "\tauthor integer,\n"
+               "\tcreate_date datetime,\n"
+               "\trating integer,\n"
+               "\tretweets integer\n"
+               ");\n");
 
-    for (const auto &row : db(select(all_of(tab)).from(tab).unconditionally())) {
+    TabUsers tabUsers;
+    db(insert_into(tabUsers).set(
+            tabUsers.name = "twitter",
+            tabUsers.username = "twitter",
+            tabUsers.password_hash = 123,
+            tabUsers.friends_count = 0,
+            tabUsers.followers_count = 0,
+            tabUsers.avatar = "path"));
+
+    for (const auto &row : db(select(all_of(tabUsers)).from(tabUsers).unconditionally())) {
         std::cout << row.id << " " <<
         row.name << " " <<
         row.username << " " <<
@@ -56,5 +66,22 @@ int main() {
         row.followers_count << " " <<
         row.friends_count << " " <<
         row.password_hash << " " << std::endl;
+    };
+
+    TabTweets tabTweets;
+    db(insert_into(tabTweets).set(
+            tabTweets.body = "twittertwittertwitter",
+            tabTweets.create_date = std::chrono::system_clock::now(),
+            tabTweets.author = 1,
+            tabTweets.retweets = 0,
+            tabTweets.rating = 0));
+
+    for (const auto &row : db(select(all_of(tabTweets)).from(tabTweets).unconditionally())) {
+        std::cout << row.id << " " <<
+        row.body << " " <<
+        row.create_date << " " <<
+        row.author << " " <<
+        row.retweets << " " <<
+        row.rating << " " << std::endl;
     };
 }

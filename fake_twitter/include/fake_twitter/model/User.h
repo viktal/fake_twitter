@@ -6,7 +6,7 @@ namespace fake_twitter {
 namespace model {
 
     struct User {
-        const long id;
+        const PKey id;
         std::string name;
         const std::string username;
         PasswordHash password_hash;
