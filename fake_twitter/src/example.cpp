@@ -6,6 +6,7 @@
 
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/model/Tweet.h"
+#include "fake_twitter/model/Comment.h"
 
 #include <rapidjson/rapidjson.h>
 #include "fake_twitter/serializer/json.h"
@@ -17,6 +18,7 @@
 
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
+#include "fake_twitter/sqlpp_models/CommentsTab.h"
 
 
 using namespace Pistache;
@@ -46,6 +48,7 @@ public:
         using namespace Rest;
         Routes::Get(router, "/0.0/users/show.json", Routes::bind(&StatsEndpoint::userShow, this));
         Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&StatsEndpoint::tweetShow, this));
+        Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&StatsEndpoint::commentShow, this));
     }
 
 private:
@@ -109,6 +112,35 @@ private:
 
     }
 
+    void commentShow(const Rest::Request &request, Http::ResponseWriter response) {
+        using namespace rapidjson;
+
+        using namespace fake_twitter;
+        using fake_twitter::sqlpp_models::TabComments;
+
+        auto id_optional = request.query().get("id");
+        if (id_optional.isEmpty())
+        {
+            response.send(Http::Code::Bad_Request, "No id parameter");
+            return;
+        }
+        auto id = std::stol(id_optional.get());
+
+        TabComments tab;
+        auto result = (*db)(select(all_of(tab)).from(tab)
+                                    .where(tab.id == id));
+        if (result.empty()) {
+            response.send(Http::Code::Bad_Request, "No comment with this id");
+            return;
+        }
+
+        auto& first = result.front();
+        model::Comment comment = {first.id.value(), first.body.value(), first.author.value()};
+
+        response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+        response.send(Http::Code::Ok, serialization::to_json(comment));
+
+    }
     std::shared_ptr<Http::Endpoint> httpEndpoint;
     Rest::Router router;
 
@@ -117,7 +149,7 @@ private:
 };
 
 int main(int argc, char *argv[]) {
-    Port port(9080);
+    Port port(9081);
 
     int thr = 2;
 

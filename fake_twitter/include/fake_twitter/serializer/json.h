@@ -30,6 +30,27 @@ namespace fake_twitter::serialization {
         return buffer.GetString();
     }
 
+    std::string to_json(model::Comment comment) {
+        using namespace rapidjson;
+
+        Document d;
+        d.SetObject();
+        rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+        d.AddMember("id", comment.id, allocator);
+        d.AddMember("name", Value().SetString(StringRef(comment.body.c_str())), allocator);
+        d.AddMember("author", comment.author, allocator);
+        d.AddMember("create_date", Value().SetString(StringRef(comment.create_date.c_str())), allocator);
+        d.AddMember("comment_for", comment.comment_for, allocator);
+        d.AddMember("rating", comment.rating, allocator);
+
+        StringBuffer buffer;
+        Writer<StringBuffer> writer(buffer);
+        d.Accept(writer);
+
+//        return "";
+        return buffer.GetString();
+    }
     std::string to_json(model::Tweet tweet) {
         using namespace rapidjson;
 
