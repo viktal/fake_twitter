@@ -1,17 +1,27 @@
-/* rest_description.cc
-   Mathieu Stefani, 27 février 2016
+/*
+   Mathieu Stefani, 07 février 2016
 
-   Example of how to use the Description mechanism
+   Example of a REST endpoint with routing
 */
 
-#include <pistache/http.h>
-#include <pistache/description.h>
-#include <pistache/endpoint.h>
+#include <algorithm>
 
-#include <pistache/serializer/rapidjson.h>
+#include <pistache/http.h>
+#include <pistache/router.h>
+#include <pistache/endpoint.h>
 
 using namespace std;
 using namespace Pistache;
+
+void printCookies(const Http::Request& req) {
+    auto cookies = req.cookies();
+    std::cout << "Cookies: [" << std::endl;
+    const std::string indent(4, ' ');
+    for (const auto& c: cookies) {
+        std::cout << indent << c.name << " = " << c.value << std::endl;
+    }
+    std::cout << "]" << std::endl;
+}
 
 namespace Generic {
 
@@ -21,113 +31,116 @@ namespace Generic {
 
 }
 
-class BankerService {
+class StatsEndpoint {
 public:
-    BankerService(Address addr)
+    explicit StatsEndpoint(Address addr)
             : httpEndpoint(std::make_shared<Http::Endpoint>(addr))
-            , desc("Banking API", "0.1")
     { }
 
     void init(size_t thr = 2) {
         auto opts = Http::Endpoint::options()
                 .threads(static_cast<int>(thr));
         httpEndpoint->init(opts);
-        createDescription();
+        setupRoutes();
     }
 
     void start() {
-        router.initFromDescription(desc);
-
-        Rest::Swagger swagger(desc);
-        swagger
-                .uiPath("/doc")
-                .uiDirectory("/home/octal/code/web/swagger-ui-2.1.4/dist")
-                .apiPath("/banker-api.json")
-                .serializer(&Rest::Serializer::rapidJson)
-                .install(router);
-
         httpEndpoint->setHandler(router.handler());
         httpEndpoint->serve();
     }
 
 private:
-    void createDescription() {
-        desc
-                .info()
-                .license("Apache", "http://www.apache.org/licenses/LICENSE-2.0");
+    void setupRoutes() {
+        using namespace Rest;
 
-        auto backendErrorResponse =
-                desc.response(Http::Code::Internal_Server_Error, "An error occured with the backend");
-
-        desc
-                .schemes(Rest::Scheme::Http)
-                .basePath("/v1")
-                .produces(MIME(Application, Json))
-                .consumes(MIME(Application, Json));
-
-        desc
-                .route(desc.get("/ready"))
-                .bind(&Generic::handleReady)
-                .response(Http::Code::Ok, "Response to the /ready call")
-                .hide();
-
-        auto versionPath = desc.path("/v1");
-
-        auto accountsPath = versionPath.path("/accounts");
-
-        accountsPath
-                .route(desc.get("/all"))
-                .bind(&BankerService::retrieveAllAccounts, this)
-                .produces(MIME(Application, Json), MIME(Application, Xml))
-                .response(Http::Code::Ok, "The list of all account");
-
-        accountsPath
-                .route(desc.get("/:name"), "Retrieve an account")
-                .bind(&BankerService::retrieveAccount, this)
-                .produces(MIME(Application, Json))
-                .parameter<Rest::Type::String>("name", "The name of the account to retrieve")
-                .response(Http::Code::Ok, "The requested account")
-                .response(backendErrorResponse);
-
-        accountsPath
-                .route(desc.post("/:name"), "Create an account")
-                .bind(&BankerService::createAccount, this)
-                .produces(MIME(Application, Json))
-                .consumes(MIME(Application, Json))
-                .parameter<Rest::Type::String>("name", "The name of the account to create")
-                .response(Http::Code::Ok, "The initial state of the account")
-                .response(backendErrorResponse);
-
-        auto accountPath = accountsPath.path("/:name");
-        accountPath.parameter<Rest::Type::String>("name", "The name of the account to operate on");
-
-        accountPath
-                .route(desc.post("/budget"), "Add budget to the account")
-                .bind(&BankerService::creditAccount, this)
-                .produces(MIME(Application, Json))
-                .response(Http::Code::Ok, "Budget has been added to the account")
-                .response(backendErrorResponse);
+        Routes::Post(router, "/record/:name/:value?", Routes::bind(&StatsEndpoint::doRecordMetric, this));
+        Routes::Get(router, "/value/:name", Routes::bind(&StatsEndpoint::doGetMetric, this));
+        Routes::Get(router, "/ready", Routes::bind(&Generic::handleReady));
+        Routes::Get(router, "/auth", Routes::bind(&StatsEndpoint::doAuth, this));
 
     }
 
-    void retrieveAllAccounts(const Rest::Request&, Http::ResponseWriter response) {
-        response.send(Http::Code::Ok, "No Account");
+    void doRecordMetric(const Rest::Request& request, Http::ResponseWriter response) {
+        auto name = request.param(":name").as<std::string>();
+
+        Guard guard(metricsLock);
+        auto it = std::find_if(metrics.begin(), metrics.end(), [&](const Metric& metric) {
+            return metric.name() == name;
+        });
+
+        int val = 1;
+        if (request.hasParam(":value")) {
+            auto value = request.param(":value");
+            val = value.as<int>();
+        }
+
+        if (it == std::end(metrics)) {
+            metrics.push_back(Metric(std::move(name), val));
+            response.send(Http::Code::Created, std::to_string(val));
+        }
+        else {
+            auto &metric = *it;
+            metric.incr(val);
+            response.send(Http::Code::Ok, std::to_string(metric.value()));
+        }
+
     }
 
-    void retrieveAccount(const Rest::Request&, Http::ResponseWriter response) {
-        response.send(Http::Code::Ok, "The bank is closed, come back later");
+    void doGetMetric(const Rest::Request& request, Http::ResponseWriter response) {
+        auto name = request.param(":name").as<std::string>();
+
+        Guard guard(metricsLock);
+        auto it = std::find_if(metrics.begin(), metrics.end(), [&](const Metric& metric) {
+            return metric.name() == name;
+        });
+
+        if (it == std::end(metrics)) {
+            response.send(Http::Code::Not_Found, "Metric does not exist");
+        } else {
+            const auto& metric = *it;
+            response.send(Http::Code::Ok, std::to_string(metric.value()));
+        }
+
     }
 
-    void createAccount(const Rest::Request&, Http::ResponseWriter response) {
-        response.send(Http::Code::Ok, "The bank is closed, come back later");
+    void doAuth(const Rest::Request& request, Http::ResponseWriter response) {
+        printCookies(request);
+        response.cookies()
+                .add(Http::Cookie("lang", "en-US"));
+        response.send(Http::Code::Ok);
     }
 
-    void creditAccount(const Rest::Request&, Http::ResponseWriter response) {
-        response.send(Http::Code::Ok, "The bank is closed, come back later");
-    }
+    class Metric {
+    public:
+        explicit Metric(std::string name, int initialValue = 1)
+                : name_(std::move(name))
+                , value_(initialValue)
+        { }
+
+        int incr(int n = 1) {
+            int old = value_;
+            value_ += n;
+            return old;
+        }
+
+        int value() const {
+            return value_;
+        }
+
+        const std::string& name() const {
+            return name_;
+        }
+    private:
+        std::string name_;
+        int value_;
+    };
+
+    using Lock = std::mutex;
+    using Guard = std::lock_guard<Lock>;
+    Lock metricsLock;
+    std::vector<Metric> metrics;
 
     std::shared_ptr<Http::Endpoint> httpEndpoint;
-    Rest::Description desc;
     Rest::Router router;
 };
 
@@ -148,8 +161,8 @@ int main(int argc, char *argv[]) {
     cout << "Cores = " << hardware_concurrency() << endl;
     cout << "Using " << thr << " threads" << endl;
 
-    BankerService banker(addr);
+    StatsEndpoint stats(addr);
 
-    banker.init(thr);
-    banker.start();
+    stats.init(thr);
+    stats.start();
 }
