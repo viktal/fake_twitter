@@ -17,6 +17,6 @@ jobs:
           git submodule update --init --recursive
           git-lfs pull
       - name: Install CMake
-        run:  sudo apt-get update && sudo apt-get install -y cmake valgrind lcov
+        run:  sudo apt-get update && sudo apt-get install -y cmake valgrind lcov libsqlite3-dev
       - name: Build binary
         run:  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build .
