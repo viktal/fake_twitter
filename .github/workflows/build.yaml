@@ -1,0 +1,22 @@
+name: Linux builds
+on: [pull_request]
+
+jobs:
+  build_ubuntu:
+    name: Build-test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: Checkout submodules and git-lfs
+        shell: bash
+        run: |
+          git submodule update --init --recursive
+          git-lfs pull
+      - name: Install CMake
+        run:  sudo apt-get update && sudo apt-get install -y cmake valgrind lcov
+      - name: Build binary
+        run:  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build .
