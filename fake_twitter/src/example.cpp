@@ -131,7 +131,6 @@ private:
             return;
         }
         auto id = std::stol(id_optional.get());
-
         TabTweets tab;
         auto result = (*db)(select(all_of(tab)).from(tab)
                                     .where(tab.id == id));
