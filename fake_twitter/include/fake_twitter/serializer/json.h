@@ -6,11 +6,11 @@
 #include <rapidjson/writer.h>
 #include <fake_twitter/model/Tweet.h>
 
+using namespace rapidjson;
+
 namespace fake_twitter::serialization {
 
     std::string to_json(model::User user) {
-        using namespace rapidjson;
-
         Document d;
         d.SetObject();
         rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
@@ -31,8 +31,6 @@ namespace fake_twitter::serialization {
     }
 
     std::string to_json(model::Tweet tweet) {
-        using namespace rapidjson;
-
         Document d;
         d.SetObject();
         rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
