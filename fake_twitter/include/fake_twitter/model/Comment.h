@@ -6,7 +6,15 @@
 namespace fake_twitter::model {
 
     struct Comment {
-        const PKey id;
+        Comment(PKey id_t, std::string body_t, PKey author_t, PKey comment_for_t): id(id_t), body(body_t), author(author_t), comment_for(comment_for_t){};
+        Comment(): id(0), body("void"), author(0), comment_for(0), create_date("0"), rating(0) {};
+        void set(PKey id_t, std::string body_t, PKey author_t, PKey comment_for_t) {
+            id = id_t;
+            body = body_t;
+            author = author_t;
+            comment_for = comment_for_t;
+        };
+        PKey id;
         std::string body;
         PKey author;
         PKey comment_for;

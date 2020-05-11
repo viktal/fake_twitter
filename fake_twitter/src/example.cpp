@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iostream>
 
 #include <pistache/http.h>
 #include <pistache/router.h>
@@ -49,9 +50,29 @@ public:
         Routes::Get(router, "/0.0/users/show.json", Routes::bind(&StatsEndpoint::userShow, this));
         Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&StatsEndpoint::tweetShow, this));
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&StatsEndpoint::commentShow, this));
+        Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&StatsEndpoint::CommentForTweetShow, this));
+        Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&StatsEndpoint::CommentDelete, this));
     }
 
 private:
+    void CommentDelete(const Rest::Request &request, Http::ResponseWriter response) {
+        std::cout<<"sosi" << std::endl;
+        using namespace rapidjson;
+        using namespace fake_twitter;
+        using fake_twitter::sqlpp_models::TabComments;
+        auto id_optional = request.query().get("id");
+        if (id_optional.isEmpty())
+        {
+            response.send(Http::Code::Bad_Request, "No id parameter");
+            return;
+        }
+        auto id = stol(id_optional.get());
+         TabComments tab;
+        (*db)(remove_from(tab).where(tab.id == id));
+
+            response.send(Pistache::Http::Code::Ok, "Comment deleted");
+    }
+
     void userShow(const Rest::Request &request, Http::ResponseWriter response) {
         using namespace rapidjson;
 
@@ -135,11 +156,48 @@ private:
         }
 
         auto& first = result.front();
-        model::Comment comment = {first.id.value(), first.body.value(), first.author.value()};
+        model::Comment comment = {first.id.value(), first.body.value(), first.author.value(), first.comment_for.value()};
 
         response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
         response.send(Http::Code::Ok, serialization::to_json(comment));
 
+    }
+
+    void CommentForTweetShow(const Rest::Request &request, Http::ResponseWriter response) {
+        using namespace rapidjson;
+
+        using namespace fake_twitter;
+        using fake_twitter::sqlpp_models::TabComments;
+
+        auto id_optional = request.query().get("id");
+        if (id_optional.isEmpty())
+        {
+            response.send(Http::Code::Bad_Request, "No id parameter");
+            return;
+        }
+        auto id = std::stol(id_optional.get());
+        TabComments tab;
+        //auto result = (*db)(select(all_of(tab)).from(tab)
+                                    //.where(tab.comment_for == id));
+        model::Comment* comment = new model::Comment[6];
+        auto result = (*db)(select(all_of(tab)).from(tab)
+                                    .where(tab.comment_for == id));
+        if (result.empty()) {
+            response.send(Http::Code::Bad_Request, "No comment with this id");
+            delete []comment;
+            return;
+        }
+        int i;
+        while (!result.empty()) {
+            const auto &row = result.front();
+            comment[i].set(row.id.value(), row.body.value(), row.author.value(), row.comment_for.value());
+            i++;
+            result.pop_front();
+        }
+        response.headers().add<Http::Header::ContentType>(MIME(Application, Json));
+        response.send(Http::Code::Ok, serialization::to_json(comment, i));
+        delete []comment;
+        return;
     }
     std::shared_ptr<Http::Endpoint> httpEndpoint;
     Rest::Router router;
@@ -149,7 +207,7 @@ private:
 };
 
 int main(int argc, char *argv[]) {
-    Port port(9081);
+    Port port(9080);
 
     int thr = 2;
 

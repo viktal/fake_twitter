@@ -32,7 +32,7 @@ int main() {
 
     sql::connection db(config);
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
-    /*db.execute("CREATE TABLE Users (\n"
+    db.execute("CREATE TABLE Users (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
                "\tname varchar,\n"
                "\tusername varchar,\n"
@@ -40,16 +40,16 @@ int main() {
                "\tavatar string,\n"
                "\tfollowers_count integer,\n"
                "\tfriends_count integer\n"
-               ");\n");*/
+               ");\n");
 
-    /*db.execute("CREATE TABLE Tweets (\n"
+    db.execute("CREATE TABLE Tweets (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
                "\tbody string,\n"
                "\tauthor integer,\n"
                "\tcreate_date datetime,\n"
                "\trating integer,\n"
                "\tretweets integer\n"
-               ");\n");*/
+               ");\n");
 
     db.execute("CREATE TABLE Comments (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
@@ -104,6 +104,20 @@ int main() {
             tabComments.comment_for = 1,
             tabComments.rating = 0));
 
+    for (const auto &row : db(select(all_of(tabComments)).from(tabComments).unconditionally())) {
+        std::cout << row.id << " " <<
+                  row.body << " " <<
+                  row.create_date << " " <<
+                  row.author << " " <<
+                  row.comment_for << " " <<
+                  row.rating << " " << std::endl;
+    };
+    db(insert_into(tabComments).set(
+            tabComments.body = "Why?",
+            tabComments.create_date = std::chrono::system_clock::now(),
+            tabComments.author = 1,
+            tabComments.comment_for = 2,
+            tabComments.rating = 0));
     for (const auto &row : db(select(all_of(tabComments)).from(tabComments).unconditionally())) {
         std::cout << row.id << " " <<
                   row.body << " " <<
