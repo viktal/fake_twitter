@@ -6,10 +6,16 @@
 #include <sqlite3.h>
 #include <rapidjson/rapidjson.h>
 
+#include "fake_twitter/model/User.h"
+#include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/serializer/json.h"
 #include "fake_twitter/sqlpp_models/CommentsTab.h"
 #include "fake_twitter/endpoint/CommentsEndpoint.h"
+#include "fake_twitter/sqlpp_models/UsersTab.h"
+#include "fake_twitter/sqlpp_models/TweetsTab.h"
+#include "fake_twitter/endpoint/UsersEndpoint.h"
+#include "fake_twitter/endpoint/TweetsEndpoint.h"
 
 
 
@@ -17,6 +23,8 @@ using namespace Pistache;
 using namespace rapidjson;
 using namespace fake_twitter;
 using fake_twitter::endpoints::CommentsEndpoint;
+using fake_twitter::endpoints::UsersEndpoint;
+using fake_twitter::endpoints::TweetsEndpoint;
 namespace sql = sqlpp::sqlite3;
 
 class RestServer {
@@ -25,6 +33,8 @@ public:
         httpEndpoint = std::make_shared<Http::Endpoint>(addr);
 //        db = std::make_unique<sql::connection>(config);
         commentsEndpoint = std::make_unique<CommentsEndpoint>(std::make_unique<sql::connection>(config));
+        usersEndpoint = std::make_unique<UsersEndpoint>(std::make_unique<sql::connection>(config));
+        tweetsEndpoint = std::make_unique<TweetsEndpoint>(std::make_unique<sql::connection>(config));
     }
 
     void init(size_t thr = 2) {
@@ -48,9 +58,15 @@ public:
         Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&CommentsEndpoint::Delete, commentsEndpoint));
         Routes::Put(router, "/0.0/CommentRaseLikes/update", Routes::bind(&CommentsEndpoint::RaseLikes, commentsEndpoint));
         Routes::Post(router, "/0.0/CommentCreate/create", Routes::bind(&CommentsEndpoint::create, commentsEndpoint));
+        Routes::Get(router, "/0.0/users/show.json", Routes::bind(&UsersEndpoint::show, usersEndpoint));
+//       Routes::Get(router, "/0.0/users/show.json", Routes::bind(&StatsEndpoint::userShow, this));
+        Routes::Post(router, "/0.0/users/create", Routes::bind(&UsersEndpoint::create, usersEndpoint));
+        Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&TweetsEndpoint::show, tweetsEndpoint));
     }
 
 private:
+    std::shared_ptr<UsersEndpoint>  usersEndpoint;
+    std::shared_ptr<TweetsEndpoint> tweetsEndpoint;
     std::shared_ptr<CommentsEndpoint>  commentsEndpoint;
     std::shared_ptr<Http::Endpoint> httpEndpoint;
     Rest::Router router;
