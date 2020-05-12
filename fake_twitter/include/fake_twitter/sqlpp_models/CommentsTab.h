@@ -74,6 +74,28 @@ namespace fake_twitter::sqlpp_models
             };
             using _traits = sqlpp::make_traits<sqlpp::integer>;
         };
+        struct comment_for
+        {
+            struct _alias_t
+            {
+                static constexpr const char _literal[] = "comment_for";
+                using _name_t = sqlpp::make_char_sequence<sizeof(_literal), _literal>;
+                template <typename T>
+                struct _member_t
+                {
+                    T comment_for;
+                    T& operator()()
+                    {
+                        return comment_for;
+                    }
+                    const T& operator()() const
+                    {
+                        return comment_for;
+                    }
+                };
+            };
+            using _traits = sqlpp::make_traits<sqlpp::integer>;
+        };
         struct create_date
         {
             struct _alias_t
@@ -118,36 +140,14 @@ namespace fake_twitter::sqlpp_models
             };
             using _traits = sqlpp::make_traits<sqlpp::integer>;
         };
-        struct comment_for
-        {
-            struct _alias_t
-            {
-                static constexpr const char _literal[] = "comment_for";
-                using _name_t = sqlpp::make_char_sequence<sizeof(_literal), _literal>;
-                template <typename T>
-                struct _member_t
-                {
-                    T comment_for;
-                    T& operator()()
-                    {
-                        return comment_for;
-                    }
-                    const T& operator()() const
-                    {
-                        return comment_for;
-                    }
-                };
-            };
-            using _traits = sqlpp::make_traits<sqlpp::integer>;
-        };
     }  // namespace TabTweets_
 
     struct TabComments : sqlpp::table_t<TabComments, TabComments_::id,
             TabComments_::body,
             TabComments_::author,
+            TabComments_::comment_for,
             TabComments_::create_date,
-            TabComments_::rating,
-            TabComments_::comment_for>
+            TabComments_::rating>
     {
         struct _alias_t
         {
