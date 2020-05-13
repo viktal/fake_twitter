@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sqlpp11/sqlpp11.h>
+#include <optional>
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"
