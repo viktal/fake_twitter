@@ -6,6 +6,7 @@
 #include <rapidjson/writer.h>
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/model/Tweet.h"
+#include "fake_twitter/model/Comment.h"
 
 
 using namespace rapidjson;
