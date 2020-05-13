@@ -8,7 +8,7 @@ namespace model {
     struct User {
         const PKey id;
         std::string name;
-        const std::string username;
+        std::string username;
         PasswordHash password_hash;
         Avatar avatar = "/path/";
         size_t followers_count = 0;
