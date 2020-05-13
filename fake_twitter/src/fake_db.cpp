@@ -49,6 +49,18 @@ int main() {
                "\tretweets integer\n"
                ");\n");
 
+    db.execute("CREATE TABLE Likes (\n"
+               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
+               "\tauthor integer,\n"
+               "\ttwit integer\n"
+               ");\n");
+
+    db.execute("CREATE TABLE Follower (\n"
+               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
+               "\tauthor integer,\n"
+               "\taddresser integer\n"
+               ");\n");
+
     TabUsers tabUsers;
     db(insert_into(tabUsers).set(
             tabUsers.name = "twitter",
