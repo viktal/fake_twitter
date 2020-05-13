@@ -1,8 +1,9 @@
 #pragma once
 #include <pistache/router.h>
 #include <sqlpp11/sqlpp11.h>
-#include <fake_twitter/serializer/json.h>
+#include <optional>
 
+#include <fake_twitter/serializer/json.h>
 #include "fake_twitter/repository/UsersRepository.h"
 
 using fake_twitter::sqlpp_models::TabUsers;
