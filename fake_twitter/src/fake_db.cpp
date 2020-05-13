@@ -52,14 +52,14 @@ int main() {
                "\tretweets integer\n"
                ");\n");
 
-    /*db.execute("CREATE TABLE Comments (\n"
+    db.execute("CREATE TABLE Comments (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
                "\tbody text,\n"
                "\tcreate_date datetime,\n"
                "\trating integer,\n"
                "\tauthor string,\n"
                "\tcomment_for integer\n"
-               ");\n");*/
+               ");\n");
 
 
     TabComments tabComments;

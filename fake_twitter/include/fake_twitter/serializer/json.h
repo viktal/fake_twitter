@@ -10,6 +10,8 @@
 
 using namespace rapidjson;
 
+using namespace rapidjson;
+
 namespace fake_twitter::serialization {
 
     std::string to_json(model::User user) {
