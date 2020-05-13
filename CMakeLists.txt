@@ -3,4 +3,4 @@ project(fake_twitter LANGUAGES CXX)
 
 add_subdirectory(third_party)
 add_subdirectory(fake_twitter)
-#add_subdirectory(tests)
+add_subdirectory(tests)
