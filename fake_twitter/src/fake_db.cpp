@@ -3,16 +3,9 @@
 #include <sqlpp11/sqlpp11.h>
 
 #include "fake_twitter/sqlpp_models/CommentsTab.h"
+#include "fake_twitter/fake.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
-
-#ifdef SQLPP_USE_SQLCIPHER
-#include <sqlcipher/sqlite3.h>
-#else
-
-#include <sqlite3.h>
-
-#endif
 
 #include <cassert>
 #include <iostream>
@@ -32,25 +25,7 @@ int main() {
 
     sql::connection db(config);
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
-
-    db.execute("CREATE TABLE Users (\n"
-               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-               "\tname varchar,\n"
-               "\tusername varchar,\n"
-               "\tpassword_hash integer,\n"
-               "\tavatar string,\n"
-               "\tfollowers_count integer,\n"
-               "\tfriends_count integer\n"
-               ");\n");
-
-    db.execute("CREATE TABLE Tweets (\n"
-               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-               "\tbody string,\n"
-               "\tauthor integer,\n"
-               "\tcreate_date datetime,\n"
-               "\trating integer,\n"
-               "\tretweets integer\n"
-               ");\n");
+    fake_twitter::fake::sqlite3tables(db);
 
     db.execute("CREATE TABLE Likes (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
@@ -122,5 +97,3 @@ int main() {
             tabTweets.retweets = 0,
             tabTweets.rating = 0));
 }
-
-
