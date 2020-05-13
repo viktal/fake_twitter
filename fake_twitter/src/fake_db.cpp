@@ -2,6 +2,7 @@
 #include <sqlpp11/sqlite3/sqlite3.h>
 #include <sqlpp11/sqlpp11.h>
 
+#include "fake_twitter/sqlpp_models/CommentsTab.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
 
@@ -18,6 +19,7 @@
 #include <vector>
 
 namespace sql = sqlpp::sqlite3;
+using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabUsers;
 using fake_twitter::sqlpp_models::TabTweets;
 
@@ -30,6 +32,7 @@ int main() {
 
     sql::connection db(config);
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
+
     db.execute("CREATE TABLE Users (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
                "\tname varchar,\n"
@@ -49,6 +52,46 @@ int main() {
                "\tretweets integer\n"
                ");\n");
 
+    db.execute("CREATE TABLE Comments (\n"
+               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
+               "\tbody text,\n"
+               "\tcreate_date datetime,\n"
+               "\trating integer,\n"
+               "\tauthor string,\n"
+               "\tcomment_for integer\n"
+               ");\n");
+
+
+    TabComments tabComments;
+    db(insert_into(tabComments).set(
+            tabComments.body = "lublu igrat v dotu 2",
+            tabComments.create_date = std::chrono::system_clock::now(),
+            tabComments.author = 1,
+            tabComments.comment_for = 1,
+            tabComments.rating = 0));
+
+    for (const auto &row : db(select(all_of(tabComments)).from(tabComments).unconditionally())) {
+        std::cout << row.id << " " <<
+                  row.body << " " <<
+                  row.create_date << " " <<
+                  row.author << " " <<
+                  row.comment_for << " " <<
+                  row.rating << " " << std::endl;
+    };
+    db(insert_into(tabComments).set(
+            tabComments.body = "Why?",
+            tabComments.create_date = std::chrono::system_clock::now(),
+            tabComments.author = 1,
+            tabComments.comment_for = 2,
+            tabComments.rating = 0));
+    for (const auto &row : db(select(all_of(tabComments)).from(tabComments).unconditionally())) {
+        std::cout << row.id << " " <<
+                  row.body << " " <<
+                  row.create_date << " " <<
+                  row.author << " " <<
+                  row.comment_for << " " <<
+                  row.rating << " " << std::endl;
+    };
     TabUsers tabUsers;
     db(insert_into(tabUsers).set(
             tabUsers.name = "twitter",
@@ -58,16 +101,6 @@ int main() {
             tabUsers.followers_count = 0,
             tabUsers.avatar = "path"));
 
-    for (const auto &row : db(select(all_of(tabUsers)).from(tabUsers).unconditionally())) {
-        std::cout << row.id << " " <<
-        row.name << " " <<
-        row.username << " " <<
-        row.avatar << " " <<
-        row.followers_count << " " <<
-        row.friends_count << " " <<
-        row.password_hash << " " << std::endl;
-    };
-
     TabTweets tabTweets;
     db(insert_into(tabTweets).set(
             tabTweets.body = "twittertwittertwitter",
@@ -75,13 +108,6 @@ int main() {
             tabTweets.author = 1,
             tabTweets.retweets = 0,
             tabTweets.rating = 0));
-
-    for (const auto &row : db(select(all_of(tabTweets)).from(tabTweets).unconditionally())) {
-        std::cout << row.id << " " <<
-        row.body << " " <<
-        row.create_date << " " <<
-        row.author << " " <<
-        row.retweets << " " <<
-        row.rating << " " << std::endl;
-    };
 }
+
+
