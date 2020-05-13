@@ -42,10 +42,16 @@ namespace fake_twitter::fake {
             static std::uniform_int_distribution<int> usernameSizeSampler(2, 25);
 
             std::string username;
-            std::sample(
-                    alphanum.begin(), alphanum.end(), std::back_inserter(username),
-                    usernameSizeSampler(rnd), rnd
-            );
+
+            auto num = usernameSizeSampler(rnd);
+            for (int i = 0; i<num; i++) {
+                static std::uniform_int_distribution<int> alphanumIndSampler(0, alphanum.size() - 1);
+                username += alphanum[alphanumIndSampler(rnd)];
+            }
+//            std::sample(
+//                    alphanum.begin(), alphanum.end(), std::back_inserter(username),
+//                    usernameSizeSampler(rnd), rnd
+//            );
             return username;
         }
 
