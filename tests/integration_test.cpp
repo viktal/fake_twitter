@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <pistache/client.h>
 #include "gtest/gtest.h"
 #include "fake_twitter/RestServer.h"
@@ -5,25 +6,33 @@
 
 using namespace Pistache;
 using namespace fake_twitter;
+const std::string TMP_SQLITE_DB_PATH = "/tmp/tmp-tests-db.sqlite";
+const std::string ADDRESS = "127.0.0.1";
+const int PORT = 8888;
 
-class test_fixture_for_users : public ::testing::Test {
+
+class test_fixture_restserver : public ::testing::Test {
 public:
     std::unique_ptr<RestServer> server;
     std::unique_ptr<Http::Client> client;
 
     void SetUp() override {
-        Port port(8888);
-        Address addr(Ipv4::any(), port);
+        if (std::filesystem::exists(TMP_SQLITE_DB_PATH))
+            std::remove(TMP_SQLITE_DB_PATH.c_str());
+
+        fake::tables(TMP_SQLITE_DB_PATH);
+
+        Port port(PORT);
+        Address addr(ADDRESS, port);
 
         auto opts = Http::Endpoint::options()
                 .threads(4)
                 .flags(Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
 
         sql::connection_config config;
-//        config.path_to_database = ":memory:";
-        config.path_to_database = ":memory:";
-        config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_TEMP_DB | SQLITE_OPEN_CREATE;
-        config.debug = true;
+        config.path_to_database = TMP_SQLITE_DB_PATH;
+        config.flags = SQLITE_OPEN_READWRITE;
+        config.debug = false;
 
         server = std::make_unique<RestServer>(addr, config);
         server->init(opts);
@@ -37,40 +46,72 @@ public:
     void TearDown() override {
         server->shutdown();
         client->shutdown();
+        if (std::filesystem::exists(TMP_SQLITE_DB_PATH))
+            std::remove(TMP_SQLITE_DB_PATH.c_str());
     }
 };
 
-TEST_F(test_fixture_for_users, test_users) {
-//  IN PARALLEL!!!!!
-//    1. insert many users
-//    2. select many users
-//    3. update many users
-//    4. delete many users
+TEST_F(test_fixture_restserver, test_many_users_create_show) {
+    const int num_iterations = 1000;
+    const std::string url = "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/users/";
+    const std::string url_create = url + "create/?";
+    const std::string url_show = url + "show/?";
 
-    const int timeout_sec = 5;
-    const int num_iterations = 10;
 
     std::vector<Async::Promise<Http::Response>> responses;
-    responses.reserve(num_iterations);
-    const std::string url = "http://127.0.0.1:8888/0.0/users/create?";
+    std::vector<model::User> insertedUsers;
+    std::mutex lock;
+
+    auto faillmbda = [](std::exception_ptr exceptionPtr) {
+        GTEST_FAIL();
+    };
+
+    // create random users
     for (int i = 0; i < num_iterations; i++) {
-        auto user = fake::user();
-        auto post = url + "username=" + user.username + "&name=" + user.name;
+        auto userToInsert = fake::user();
+        auto post = url_create + "username=" + userToInsert.username + "&name=" + userToInsert.name;
         auto response = client->post(post)
                 .send();
         response.then(
-                [](Http::Response rsp) {
+                [&](Http::Response rsp) {
                     EXPECT_EQ(rsp.code(), Http::Code::Ok);
-                },
-                [](std::exception_ptr exceptionPtr) {
-                    GTEST_FAIL();
-                });
+                    auto insertedUser = serialization::from_json<model::User>(rsp.body());
+                    EXPECT_EQ(insertedUser.name, userToInsert.name);
+                    EXPECT_EQ(insertedUser.username, userToInsert.username);
+
+                    std::lock_guard<std::mutex> guard(lock);
+                    insertedUsers.push_back(std::move(insertedUser));
+                }, faillmbda
+        );
         responses.push_back(std::move(response));
     }
 
-    auto sync = Async::whenAll(responses.begin(), responses.end());
-    Async::Barrier<std::vector<Http::Response>> barrier(sync);
-    barrier.wait_for(std::chrono::seconds(timeout_sec));
+    {
+        auto sync = Async::whenAll(responses.begin(), responses.end());
+        Async::Barrier<std::vector<Http::Response>> barrier(sync);
+        barrier.wait();
+    }
+
+    // query and compare inserted users with on-server user
+    responses.clear();
+    for (auto &insertedUser: insertedUsers) {
+        auto geturl = url_show + "id=" + std::to_string(insertedUser.id);
+        auto response = client->get(geturl).send();
+        response.then(
+                [&](Http::Response rsp) {
+                    EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                    auto onServerUser = serialization::from_json<model::User>(rsp.body());
+                    EXPECT_EQ(insertedUser, onServerUser);
+                }, faillmbda
+        );
+        responses.push_back(std::move(response));
+    }
+
+    {
+        auto sync = Async::whenAll(responses.begin(), responses.end());
+        Async::Barrier<std::vector<Http::Response>> barrier(sync);
+        barrier.wait();
+    }
 }
 
 

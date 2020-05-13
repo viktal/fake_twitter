@@ -9,7 +9,8 @@
 #include "fake_twitter/serializer/json.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
-#include "fake_twitter/repository/usersRepository.h"
+#include "fake_twitter/repository/UsersRepository.h"
+#include "fake_twitter/repository/DBConnectionsPool.h"
 #include "fake_twitter/endpoint/UsersEndpoint.h"
 #include "fake_twitter/endpoint/TweetsEndpoint.h"
 
@@ -28,11 +29,13 @@ public:
         httpEndpoint = std::make_shared<Http::Endpoint>(addr);
 //        db = std::make_unique<sql::connection>(config);
 
-        usersRepository = std::make_unique<repository::UsersRepository>
-                (std::make_unique<sqlpp::sqlite3::connection>(config));
+        auto connection = std::make_unique<sqlpp::sqlite3::connection>(config);
+        auto connectionsPool = std::make_shared<repository::DBConnectionsPool>(std::move(connection));
+
+        usersRepository = std::make_unique<repository::UsersRepository>(connectionsPool);
         usersEndpoint = std::make_shared<UsersEndpoint>(usersRepository);
 
-        tweetsEndpoint = std::make_unique<TweetsEndpoint>(std::make_unique<sql::connection>(config));
+//        tweetsEndpoint = std::make_unique<TweetsEndpoint>(std::make_unique<sql::connection>(config));
     }
 
     void init(Http::Endpoint::Options options) {
@@ -57,9 +60,9 @@ private:
     void setupRoutes() {
         using namespace Rest;
 
-        Routes::Get(router, "/0.0/users/show.json", Routes::bind(&UsersEndpoint::show, usersEndpoint));
+        Routes::Get(router, "/0.0/users/show", Routes::bind(&UsersEndpoint::show, usersEndpoint));
         Routes::Post(router, "/0.0/users/create", Routes::bind(&UsersEndpoint::create, usersEndpoint));
-        Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&TweetsEndpoint::show, tweetsEndpoint));
+//        Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&TweetsEndpoint::show, tweetsEndpoint));
     }
     std::shared_ptr<UsersEndpoint>  usersEndpoint;
     std::shared_ptr<TweetsEndpoint> tweetsEndpoint;

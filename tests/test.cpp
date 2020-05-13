@@ -1,17 +1,18 @@
-#include "gmock/gmock.h"
+/*
+ * #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include <sqlpp11/sqlpp11.h>
 #include <sqlpp11/sqlite3/sqlite3.h>
 #include <pistache/http.h>
 
-#include "fake_twitter/repository/usersRepository.h"
+#include "fake_twitter/repository/UsersRepository.h"
 #include "fake_twitter/endpoint/UsersEndpoint.h"
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/common.h"
 
 #include "fake_twitter/serializer/json.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
-#include "fake_twitter/repository/usersRepository.h"
+#include "fake_twitter/repository/UsersRepository.h"
 #include "fake_twitter/endpoint/UsersEndpoint.h"
 
 using namespace Pistache;
@@ -116,3 +117,4 @@ TEST_F(test_fixture_for_client, getByKey) {
     usersEndpoint.show(mockRequest, mockResponseWriter);
 
 }
+ */

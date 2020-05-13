@@ -1,7 +1,6 @@
 add_subdirectory(googletest)
 
 add_subdirectory(pistache)
-
 include(FindPkgConfig)
 find_package(Threads REQUIRED)
 add_library(mypistache SHARED $<TARGET_OBJECTS:pistache>)

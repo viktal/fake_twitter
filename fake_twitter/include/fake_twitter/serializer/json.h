@@ -30,6 +30,27 @@ namespace fake_twitter::serialization {
         return buffer.GetString();
     }
 
+
+    template<typename T>
+    T from_json(const std::string& json);
+
+    // TODO: Сделать user классом и у него статический метод from_json или как-то еще.
+    template<>
+    model::User from_json<model::User>(const std::string& json)
+    {
+        Document document;
+        document.Parse(json.c_str());
+        return model::User{
+            document["id"].Get<PKey>(),
+            document["name"].GetString(),
+            document["username"].GetString(),
+            document["password_hash"].Get<PasswordHash>(),
+            document["avatar"].GetString(),
+            document["followers_count"].Get<size_t>(),
+            document["friends_count"].Get<size_t>()
+        };
+    }
+
     std::string to_json(model::Tweet tweet) {
         Document d;
         d.SetObject();
