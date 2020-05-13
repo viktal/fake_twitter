@@ -52,6 +52,18 @@ int main() {
                "\tretweets integer\n"
                ");\n");
 
+    db.execute("CREATE TABLE Likes (\n"
+               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
+               "\tauthor integer,\n"
+               "\ttwit integer\n"
+               ");\n");
+
+    db.execute("CREATE TABLE Follower (\n"
+               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
+               "\tauthor integer,\n"
+               "\taddresser integer\n"
+               ");\n");
+
     db.execute("CREATE TABLE Comments (\n"
                "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
                "\tbody text,\n"
@@ -92,6 +104,7 @@ int main() {
                   row.comment_for << " " <<
                   row.rating << " " << std::endl;
     };
+
     TabUsers tabUsers;
     db(insert_into(tabUsers).set(
             tabUsers.name = "twitter",
