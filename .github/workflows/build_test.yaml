@@ -17,6 +17,11 @@ jobs:
           git submodule update --init --recursive
           git-lfs pull
       - name: Install CMake
-        run:  sudo apt-get update && sudo apt-get install -y cmake valgrind lcov libsqlite3-dev
+        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev
       - name: Build binary
-        run:  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release .. && cmake --build .
+        run:  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-9 .. && cmake --build .
+      - name: Run tests
+          run: |
+            cd build/tests
+            valgrind --leak-check=full --leak-resolution=med ./integration_test
+            valgrind --leak-check=full --leak-resolution=med ./test_json
