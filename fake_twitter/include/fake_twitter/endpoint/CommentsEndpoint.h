@@ -2,6 +2,9 @@
 #include <pistache/router.h>
 #include <sqlpp11/sqlpp11.h>
 
+#include "fake_twitter/model/Comment.h"
+#include "fake_twitter/serializer/json.h"
+
 namespace fake_twitter::endpoints {
     class CommentsEndpoint {
     public:
