@@ -39,7 +39,7 @@ namespace fake_twitter::serialization {
     template<typename T>
     T from_json(const std::string& json);
 
-    // TODO: Сделать user классом и у него статический метод from_json или как-то еще.
+    // TODO: Сделать user классом и у него статический метод from_json или как-то еще
     template<>
     model::User from_json<model::User>(const std::string& json)
     {
