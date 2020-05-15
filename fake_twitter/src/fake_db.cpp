@@ -7,9 +7,7 @@
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
 
-#include <cassert>
 #include <iostream>
-#include <vector>
 
 namespace sql = sqlpp::sqlite3;
 using fake_twitter::sqlpp_models::TabComments;

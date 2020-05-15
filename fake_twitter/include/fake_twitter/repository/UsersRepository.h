@@ -29,6 +29,8 @@ namespace fake_twitter::repository {
         fake_twitter::sqlpp_models::TabUsers tabUsers;
     };
 
+
+
     std::unique_ptr<model::User> UsersRepository::get(PKey id) {
         auto query = select(all_of(tabUsers)).from(tabUsers)
                 .where(tabUsers.id == id);
