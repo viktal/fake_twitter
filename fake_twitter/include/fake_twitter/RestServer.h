@@ -26,7 +26,6 @@ using fake_twitter::endpoints::TweetsEndpoint;
 using fake_twitter::endpoints::CommentsEndpoint;
 namespace sql = sqlpp::sqlite3;
 
-
 class RestServer {
 public:
     RestServer(Address addr, sql::connection_config config) {
