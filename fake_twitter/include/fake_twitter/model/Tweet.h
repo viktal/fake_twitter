@@ -1,8 +1,8 @@
 #pragma once
 
 #include "fake_twitter/common.h"
-//#include "fake_twitter/model/User.h"
 
+//TODO: create date
 namespace fake_twitter::model {
 
         struct Tweet {

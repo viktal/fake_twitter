@@ -39,7 +39,9 @@ public:
         usersRepository = std::make_unique<repository::UsersRepository>(connectionsPool);
         usersEndpoint = std::make_shared<UsersEndpoint>(usersRepository);
 
-//        tweetsEndpoint = std::make_unique<TweetsEndpoint>(std::make_unique<sql::connection>(config));
+        tweetsRepository = std::make_unique<repository::TweetsRepository>(connectionsPool);
+        tweetsEndpoint = std::make_shared<TweetsEndpoint>(tweetsRepository);
+
     }
 
     void init(Http::Endpoint::Options options) {
@@ -66,18 +68,25 @@ private:
 
         Routes::Get(router, "/0.0/users/show", Routes::bind(&UsersEndpoint::show, usersEndpoint));
         Routes::Post(router, "/0.0/users/create", Routes::bind(&UsersEndpoint::create, usersEndpoint));
+        Routes::Put(router, "/0.0/users/update", Routes::bind(&UsersEndpoint::update, usersEndpoint));
+        Routes::Delete(router, "/0.0/users/drop", Routes::bind(&UsersEndpoint::drop, usersEndpoint));
+
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&CommentsEndpoint::show, commentsEndpoint));
         Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
-        Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&CommentsEndpoint::Delete, commentsEndpoint));
-        Routes::Put(router, "/0.0/CommentRaseLikes/update", Routes::bind(&CommentsEndpoint::RaseLikes, commentsEndpoint));
         Routes::Post(router, "/0.0/CommentCreate/create", Routes::bind(&CommentsEndpoint::create, commentsEndpoint));
-//        Routes::Get(router, "/0.0/tweets/show.json", Routes::bind(&TweetsEndpoint::show, tweetsEndpoint));
+        Routes::Put(router, "/0.0/CommentRaseLikes/update", Routes::bind(&CommentsEndpoint::RaseLikes, commentsEndpoint));
+        Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&CommentsEndpoint::Delete, commentsEndpoint));
+
+        Routes::Get(router, "/0.0/tweets/show", Routes::bind(&TweetsEndpoint::show, tweetsEndpoint));
+        Routes::Post(router, "/0.0/tweets/create", Routes::bind(&TweetsEndpoint::create, tweetsEndpoint));
+        Routes::Delete(router, "/0.0/tweets/drop", Routes::bind(&TweetsEndpoint::drop, tweetsEndpoint));
     }
     std::shared_ptr<UsersEndpoint>  usersEndpoint;
+    std::shared_ptr<repository::UsersRepository> usersRepository;
     std::shared_ptr<TweetsEndpoint> tweetsEndpoint;
+    std::shared_ptr<repository::TweetsRepository> tweetsRepository;
     std::shared_ptr<CommentsEndpoint> commentsEndpoint;
     std::shared_ptr<Http::Endpoint> httpEndpoint;
-    std::shared_ptr<repository::UsersRepository> usersRepository;
     Rest::Router router;
 
 //    std::unique_ptr<sql::connection> db;
