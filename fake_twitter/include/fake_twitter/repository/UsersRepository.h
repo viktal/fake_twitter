@@ -74,7 +74,8 @@ namespace fake_twitter::repository {
                 tabUsers.followers_count = 0,
                 tabUsers.avatar = "path"));
 
-        return std::move(model::User{PKey(newid), name, username, 123, "path", 0, 0});
+        return std::move(model::User{PKey(newid), name, username, 123,
+                                     "path", 0, 0});
     }
 
     bool UsersRepository::drop(PKey id) {
@@ -99,21 +100,21 @@ namespace fake_twitter::repository {
 
     bool UsersRepository::follow(PKey author, PKey addresser) {
         auto result = pool->run(select(all_of(tabFollower)).from(tabFollower)
-                .where(tabFollower.author == author && tabFollower.addresser == addresser));
+                                        .where(tabFollower.author == author &&
+                                               tabFollower.addresser == addresser));
         if (result.empty()) {
-            std::cout << "true" << std::endl;
             auto j = pool->run(insert_into(tabFollower).set(
                     tabFollower.author = author,
                     tabFollower.addresser = addresser));
             return true;
         }
-
-        std::cout << "false" << std::endl;
         return false;
     }
 
     bool UsersRepository::unfollow(PKey author, PKey addresser) {
-        return pool->run(remove_from(tabFollower).where(tabFollower.author == author && tabFollower.addresser == addresser));
+        return pool->run(
+                remove_from(tabFollower).
+                        where(tabFollower.author == author && tabFollower.addresser == addresser));
     }
 
 } //end namespace fake_twitter::repository
