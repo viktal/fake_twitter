@@ -75,6 +75,7 @@ private:
         Routes::Put(router, "/0.0/users/update", Routes::bind(&UsersEndpoint::update, usersEndpoint));
         Routes::Delete(router, "/0.0/users/drop", Routes::bind(&UsersEndpoint::drop, usersEndpoint));
 
+        Routes::Get(router, "/0.0/followers/show", Routes::bind(&UsersEndpoint::showFollowTable, usersEndpoint));
         Routes::Post(router, "/0.0/user/follow", Routes::bind(&UsersEndpoint::follow, usersEndpoint));
         Routes::Delete(router, "/0.0/user/unfollow", Routes::bind(&UsersEndpoint::unfollow, usersEndpoint));
 

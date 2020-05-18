@@ -48,18 +48,20 @@ namespace fake_twitter::endpoints {
 
     void CommentsEndpoint::create(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
         using fake_twitter::sqlpp_models::TabComments;
-        auto body_optional = request.query().get("body");
         auto author_optional = request.query().get("author");
         auto comment_for_optional = request.query().get("comment_for");
-        if (body_optional.isEmpty() ||
-            author_optional.isEmpty() ||
-            comment_for_optional.isEmpty()) {
+        auto body_json = request.body();
+        if (author_optional.isEmpty() ||
+            comment_for_optional.isEmpty() ||
+            body_json.empty()) {
             response.send(Pistache::Http::Code::Bad_Request, "Not found one or more parameters");
             return;
         }
-        auto body = std::string(body_optional.get());
         auto author = std::stol(author_optional.get());
         auto comment_for = std::stol(comment_for_optional.get());
+        Document document;
+        document.Parse(body_json.c_str());
+        auto body = std::string(document["body"].GetString());
         std::unique_ptr<model::Comment> comment = CommentsRepository->create(body, author, comment_for);
 
         response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
