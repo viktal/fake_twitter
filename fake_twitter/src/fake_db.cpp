@@ -6,6 +6,7 @@
 #include "fake_twitter/fake.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
+#include "fake_twitter/sqlpp_models/FollowerTab.h"
 
 #include <iostream>
 
@@ -13,6 +14,8 @@ namespace sql = sqlpp::sqlite3;
 using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabUsers;
 using fake_twitter::sqlpp_models::TabTweets;
+using fake_twitter::sqlpp_models::TabFollower;
+
 
 int main() {
     sql::connection_config config;
@@ -94,4 +97,10 @@ int main() {
             tabTweets.author = 1,
             tabTweets.retweets = 0,
             tabTweets.rating = 0));
+
+    TabFollower tabFollower;
+    db(insert_into(tabFollower).set(
+            tabFollower.author = 1,
+            tabFollower.addresser = 2));
+
 }
