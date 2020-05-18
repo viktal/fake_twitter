@@ -7,6 +7,7 @@
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/model/Comment.h"
+#include "fake_twitter/model/Followers.h"
 
 
 using namespace rapidjson;
@@ -67,6 +68,25 @@ namespace fake_twitter::serialization {
         d.AddMember("create_date", Value().SetString(StringRef(tweet.create_date.c_str())), allocator);
         d.AddMember("retweets", tweet.retweets, allocator);
         d.AddMember("rating", tweet.rating, allocator);
+
+        StringBuffer buffer;
+        Writer<StringBuffer> writer(buffer);
+        d.Accept(writer);
+
+//        return "";
+        return buffer.GetString();
+    }
+
+    std::string to_json(model::Followers followers) {
+        using namespace rapidjson;
+
+        Document d;
+        d.SetObject();
+        rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+        d.AddMember("id", followers.id, allocator);
+        d.AddMember("author", followers.author, allocator);
+        d.AddMember("addresser", followers.addresser, allocator);
 
         StringBuffer buffer;
         Writer<StringBuffer> writer(buffer);

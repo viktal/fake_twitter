@@ -20,6 +20,7 @@ namespace fake_twitter::endpoints {
         void update(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
         void drop(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
 
+        void showFollowTable(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
         void follow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
         void unfollow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
     private:
@@ -97,6 +98,23 @@ namespace fake_twitter::endpoints {
             response.send(Pistache::Http::Code::Bad_Request);
     }
 
+    void UsersEndpoint::showFollowTable(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
+        auto id_optional = request.query().get("id");
+        if (id_optional.isEmpty()) {
+            response.send(Pistache::Http::Code::Bad_Request, "Not found one or more parameters");
+            return;
+        }
+        auto id = std::stol(id_optional.get());
+        std::unique_ptr<model::Followers> followers = usersRepository->getfollow(id);
+        if (!followers) {
+            response.send(Pistache::Http::Code::Bad_Request, "No user with this id");
+            return;
+        }
+        else {
+            response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
+            response.send(Pistache::Http::Code::Ok, serialization::to_json(*followers));
+        }
+    }
     void UsersEndpoint::follow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
     {
         auto author_row = request.query().get("author");
