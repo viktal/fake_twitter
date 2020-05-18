@@ -4,12 +4,13 @@
 
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/serializer/json.h"
+#include "fake_twitter/repository/CommentsRepository.h"
 
 namespace fake_twitter::endpoints {
     class CommentsEndpoint {
     public:
-        explicit CommentsEndpoint(std::unique_ptr<sqlpp::sqlite3::connection> db) {
-            this->db = std::move(db);
+        explicit CommentsEndpoint(std::shared_ptr<repository::CommentsRepository> CommentsRepository) {
+            this->CommentsRepository = std::move(CommentsRepository);
         };
 
         void show(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
@@ -23,7 +24,7 @@ namespace fake_twitter::endpoints {
         void RaseLikes(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
 
     private:
-        std::unique_ptr<sqlpp::sqlite3::connection> db;
+        std::shared_ptr<repository::CommentsRepository> CommentsRepository;
     };
 
     void CommentsEndpoint::show(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
@@ -35,20 +36,14 @@ namespace fake_twitter::endpoints {
         }
         auto id = std::stol(id_optional.get());
 
-        TabComments tab;
-        auto result = (*db)(select(all_of(tab)).from(tab)
-                                    .where(tab.id == id));
-        if (result.empty()) {
-            response.send(Pistache::Http::Code::Bad_Request, "No comment with this id");
+        std::unique_ptr<model::Comment> comment = CommentsRepository->get(id);
+        if (!comment) {
+            response.send(Pistache::Http::Code::Bad_Request, "No user with this id");
             return;
         }
 
-        auto &first = result.front();
-        model::Comment comment(first.id.value(), first.body.value(), first.author.value(),
-                               first.comment_for.value(), first.rating.value());
-
         response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
-        response.send(Pistache::Http::Code::Ok, serialization::to_json(comment));
+        response.send(Pistache::Http::Code::Ok, serialization::to_json(*comment));
     }
 
     void CommentsEndpoint::create(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
@@ -65,29 +60,10 @@ namespace fake_twitter::endpoints {
         auto body = std::string(body_optional.get());
         auto author = std::stol(author_optional.get());
         auto comment_for = std::stol(comment_for_optional.get());
-
-
-        TabComments tab;
-        (*db)(insert_into(tab).set(
-                tab.body = body,
-                tab.author = author,
-                tab.comment_for = comment_for,
-                tab.rating = 0,
-                tab.create_date = std::chrono::system_clock::now()));
-
-
-        auto result = (*db)(select(all_of(tab)).from(tab)
-                                    .where(tab.body == body));
-        if (result.empty()) {
-            response.send(Pistache::Http::Code::Bad_Request, "No comment with this username");
-            return;
-        }
-        auto &first = result.front();
-        model::Comment comment(first.id.value(), first.body.value(), first.author.value(),
-                               first.comment_for.value(), first.rating.value());
+        std::unique_ptr<model::Comment> comment = CommentsRepository->create(body, author, comment_for);
 
         response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
-        response.send(Pistache::Http::Code::Ok, serialization::to_json(comment));
+        response.send(Pistache::Http::Code::Ok, serialization::to_json(*comment));
     }
 
     void CommentsEndpoint::Delete(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
@@ -100,59 +76,50 @@ namespace fake_twitter::endpoints {
             return;
         }
         auto id = stol(id_optional.get());
-        TabComments tab;
-        (*db)(remove_from(tab).where(tab.id == id));
-
-        response.send(Pistache::Http::Code::Ok, "Comment deleted");
+        bool deleted = CommentsRepository->Delete(id);
+        if(deleted)
+            response.send(Pistache::Http::Code::Ok, "Comment deleted");
+        else
+            response.send(Pistache::Http::Code::Bad_Request, "Comment not deleted");
     }
 
     void CommentsEndpoint::RaseLikes(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
-        using namespace rapidjson;
-        using namespace fake_twitter;
         using fake_twitter::sqlpp_models::TabComments;
         auto id_optional = request.query().get("id");
         if (id_optional.isEmpty()) {
             response.send(Pistache::Http::Code::Bad_Request, "No id parameter");
             return;
         }
-        auto id = stol(id_optional.get());
-        TabComments tab;
-        auto result = (*db)(select(all_of(tab)).from(tab)
-                                    .where(tab.id == id));
-        if (result.empty()) {
-            response.send(Pistache::Http::Code::Bad_Request, "No comment with this id");
+        auto id = std::stol(id_optional.get());
+
+        std::unique_ptr<model::Comment> comment = CommentsRepository->RaseLikes(id);
+        if (!comment) {
+            response.send(Pistache::Http::Code::Bad_Request, "No user with this id");
             return;
         }
-        (*db)(update(tab).set(tab.rating = tab.rating + 1).where(tab.id == id));
-        result = (*db)(select(all_of(tab)).from(tab)
-                               .where(tab.id == id));
-        auto &first = result.front();
-        model::Comment comment(first.id.value(), first.body.value(), first.author.value(),
-                               first.comment_for.value(), first.rating.value());
 
         response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
-        response.send(Pistache::Http::Code::Ok, serialization::to_json(comment));
+        response.send(Pistache::Http::Code::Ok, serialization::to_json(*comment));
     }
-    void CommentsEndpoint::showCommentsForTweet(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
+   /* void CommentsEndpoint::showCommentsForTweet(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response) {
         using namespace rapidjson;
 
         using namespace fake_twitter;
         using fake_twitter::sqlpp_models::TabComments;
 
         auto id_optional = request.query().get("id");
-        if (id_optional.isEmpty())
-        {
+        if (id_optional.isEmpty()) {
             response.send(Pistache::Http::Code::Bad_Request, "No id parameter");
             return;
         }
         auto id = std::stol(id_optional.get());
         TabComments tab;
-        model::Comment* comment = new model::Comment[6];
+        model::Comment *comment = new model::Comment[6];
         auto result = (*db)(select(all_of(tab)).from(tab)
                                     .where(tab.comment_for == id));
         if (result.empty()) {
             response.send(Pistache::Http::Code::Bad_Request, "No comment with this id");
-            delete []comment;
+            delete[]comment;
             return;
         }
         int i;
@@ -164,9 +131,9 @@ namespace fake_twitter::endpoints {
         }
         response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
         response.send(Pistache::Http::Code::Ok, serialization::to_json(comment, i));
-        delete []comment;
+        delete[]comment;
         return;
-    }
+    }*/
 
 }
 
