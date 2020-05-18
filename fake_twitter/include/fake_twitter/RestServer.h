@@ -89,8 +89,8 @@ private:
         Routes::Post(router, "/0.0/tweets/create", Routes::bind(&TweetsEndpoint::create, tweetsEndpoint));
         Routes::Delete(router, "/0.0/tweets/drop", Routes::bind(&TweetsEndpoint::drop, tweetsEndpoint));
 
-//        Routes::Post(router, "/0.0/tweets/like", Routes::bind(&TweetsEndpoint::like, tweetsEndpoint));
-//        Routes::Delete(router, "/0.0/tweets/unlike", Routes::bind(&TweetsEndpoint::unlike, tweetsEndpoint));
+        Routes::Post(router, "/0.0/tweets/like", Routes::bind(&TweetsEndpoint::like, tweetsEndpoint));
+        Routes::Delete(router, "/0.0/tweets/unlike", Routes::bind(&TweetsEndpoint::unlike, tweetsEndpoint));
     }
     std::shared_ptr<UsersEndpoint>  usersEndpoint;
     std::shared_ptr<repository::CommentsRepository> commentsRepository;
