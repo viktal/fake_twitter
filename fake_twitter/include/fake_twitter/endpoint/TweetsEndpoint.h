@@ -1,4 +1,5 @@
 #pragma once
+
 #include <pistache/router.h>
 #include <sqlpp11/sqlpp11.h>
 
@@ -11,9 +12,14 @@ namespace fake_twitter::endpoints {
         explicit TweetsEndpoint(std::shared_ptr<repository::TweetsRepository> tweetsRepository) {
             this->tweetsRepository = std::move(tweetsRepository);
         };
-        void show (const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
-        void drop (const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
-        void create (const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+
+        void show(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+        void drop(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+        void create(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+
+        void like(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+        void unlike(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+
     private:
         std::shared_ptr<repository::TweetsRepository> tweetsRepository;
     };
@@ -21,8 +27,7 @@ namespace fake_twitter::endpoints {
     void TweetsEndpoint::show(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response) {
         using fake_twitter::sqlpp_models::TabTweets;
         auto id_optional = request.query().get("id");
-        if (id_optional.isEmpty())
-        {
+        if (id_optional.isEmpty()) {
             response.send(Pistache::Http::Code::Bad_Request, "No id parameter");
             return;
         }
@@ -31,8 +36,7 @@ namespace fake_twitter::endpoints {
         if (!tweet) {
             response.send(Pistache::Http::Code::Bad_Request, "No tweet with this id");
             return;
-        }
-        else {
+        } else {
             response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
             response.send(Pistache::Http::Code::Ok, serialization::to_json(*tweet));
         }
@@ -63,11 +67,44 @@ namespace fake_twitter::endpoints {
         auto author = std::stol(author_optional.get());
         Document document;
         document.Parse(body_json.c_str());
+        // нужна поверка на наличие body
         auto body = std::string(document["body"].GetString());
 
-        auto newUser = tweetsRepository->create(author, body);
+        auto newTwit = tweetsRepository->create(author, body);
 
         response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
-        response.send(Pistache::Http::Code::Ok, serialization::to_json(newUser));
+        response.send(Pistache::Http::Code::Ok, serialization::to_json(newTwit));
+    }
+
+    void TweetsEndpoint::like(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response) {
+        auto author_row = request.query().get("author");
+        auto twit_row = request.query().get("twit");
+        if (author_row.isEmpty() || twit_row.isEmpty()) {
+            response.send(Pistache::Http::Code::Bad_Request, "Not found one or more parameters");
+            return;
+        }
+        auto author = std::stol(author_row.get());
+        auto twit = std::stol(twit_row.get());
+
+        if (tweetsRepository->like(author, twit))
+            response.send(Pistache::Http::Code::Ok);
+        else
+            response.send(Pistache::Http::Code::Bad_Request);
+    }
+
+    void TweetsEndpoint::unlike(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response) {
+        auto author_row = request.query().get("author");
+        auto twit_row = request.query().get("twit");
+        if (author_row.isEmpty() || twit_row.isEmpty()) {
+            response.send(Pistache::Http::Code::Bad_Request, "Not found one or more parameters");
+            return;
+        }
+        auto author = std::stol(author_row.get());
+        auto twit = std::stol(twit_row.get());
+
+        if (tweetsRepository->unlike(author, twit))
+            response.send(Pistache::Http::Code::Ok);
+        else
+            response.send(Pistache::Http::Code::Bad_Request);
     }
 } //end namespace fake_twitter::endpoint
