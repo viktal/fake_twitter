@@ -79,7 +79,7 @@ private:
         Routes::Delete(router, "/0.0/users/unfollow", Routes::bind(&UsersEndpoint::unfollow, usersEndpoint));
 
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&CommentsEndpoint::show, commentsEndpoint));
-       // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
+        // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
         Routes::Post(router, "/0.0/CommentCreate/create", Routes::bind(&CommentsEndpoint::create, commentsEndpoint));
         Routes::Put(router, "/0.0/CommentRaseLikes/update", Routes::bind(&CommentsEndpoint::RaseLikes, commentsEndpoint));
         Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&CommentsEndpoint::Delete, commentsEndpoint));
@@ -88,6 +88,8 @@ private:
         Routes::Post(router, "/0.0/tweets/create", Routes::bind(&TweetsEndpoint::create, tweetsEndpoint));
         Routes::Delete(router, "/0.0/tweets/drop", Routes::bind(&TweetsEndpoint::drop, tweetsEndpoint));
 
+        Routes::Post(router, "/0.0/tweets/like", Routes::bind(&TweetsEndpoint::like, tweetsEndpoint));
+        Routes::Delete(router, "/0.0/tweets/unlike", Routes::bind(&TweetsEndpoint::unlike, tweetsEndpoint));
     }
     std::shared_ptr<UsersEndpoint>  usersEndpoint;
     std::shared_ptr<repository::CommentsRepository> commentsRepository;
