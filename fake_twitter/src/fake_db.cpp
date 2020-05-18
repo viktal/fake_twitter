@@ -7,6 +7,7 @@
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
+#include "fake_twitter/sqlpp_models/LikeTab.h"
 
 #include <iostream>
 
@@ -15,6 +16,7 @@ using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabUsers;
 using fake_twitter::sqlpp_models::TabTweets;
 using fake_twitter::sqlpp_models::TabFollower;
+using fake_twitter::sqlpp_models::TabLikes;
 
 
 int main() {
@@ -90,6 +92,14 @@ int main() {
             tabUsers.followers_count = 0,
             tabUsers.avatar = "path"));
 
+    db(insert_into(tabUsers).set(
+            tabUsers.name = "twitter2",
+            tabUsers.username = "twitter2",
+            tabUsers.password_hash = 123,
+            tabUsers.friends_count = 0,
+            tabUsers.followers_count = 0,
+            tabUsers.avatar = "path"));
+
     TabTweets tabTweets;
     db(insert_into(tabTweets).set(
             tabTweets.body = "twittertwittertwitter",
@@ -99,8 +109,12 @@ int main() {
             tabTweets.rating = 0));
 
     TabFollower tabFollower;
-    db(insert_into(tabFollower).set(
-            tabFollower.author = 1,
-            tabFollower.addresser = 2));
+//    db(insert_into(tabFollower).set(
+//            tabFollower.author = 1,
+//            tabFollower.addresser = 2));
 
+    TabLikes tabLike;
+//    db(insert_into(tabLike).set(
+//            tabLike.author = 1,
+//            tabLike.twit = 2));
 }
