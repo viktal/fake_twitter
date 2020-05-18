@@ -77,6 +77,7 @@ private:
 
         Routes::Post(router, "/0.0/users/follow", Routes::bind(&UsersEndpoint::follow, usersEndpoint));
         Routes::Delete(router, "/0.0/users/unfollow", Routes::bind(&UsersEndpoint::unfollow, usersEndpoint));
+        Routes::Get(router, "/0.0/followers/show", Routes::bind(&UsersEndpoint::showFollowTable, usersEndpoint));
 
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&CommentsEndpoint::show, commentsEndpoint));
         // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));

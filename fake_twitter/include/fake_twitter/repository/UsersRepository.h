@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "fake_twitter/model/User.h"
+#include "fake_twitter/model/Followers.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
@@ -32,6 +33,7 @@ namespace fake_twitter::repository {
         virtual void update(PKey id,
                             std::optional<std::string> name,
                             std::optional<std::string> avatar);
+        virtual std::unique_ptr<model::Followers> getfollow(PKey id);
 
         virtual bool follow(PKey author, PKey addresser);
 
@@ -95,6 +97,24 @@ namespace fake_twitter::repository {
             query.assignments.add(tabUsers.avatar = avatar.value());
 
         pool->run(query.where(tabUsers.id == id));
+    }
+
+    std::unique_ptr<model::Followers> UsersRepository::getfollow(PKey id) {
+        auto query = select(all_of(tabFollower)).from(tabFollower)
+                .where(tabFollower.id == id);
+
+        auto result = pool->run(query);
+        if (result.empty()) {
+            return nullptr;
+        }
+
+        auto &first = result.front();
+        std::unique_ptr<model::Followers> follower;
+        follower = std::make_unique<model::Followers>(model::Followers{first.id.value(),
+                                                         first.author.value(),
+                                                         first.addresser.value()});
+
+        return follower;
     }
 
     bool UsersRepository::follow(PKey author, PKey addresser) {
