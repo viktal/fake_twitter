@@ -2,8 +2,12 @@
 
 #include <sqlpp11/sqlpp11.h>
 #include <optional>
+
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
+
+#include "fake_twitter/sqlpp_models/FollowerTab.h"
+
 #include "fake_twitter/repository/DBConnectionsPool.h"
 
 #include <memory>
@@ -13,23 +17,31 @@
 namespace fake_twitter::repository {
     class UsersRepository {
     public:
-        explicit UsersRepository(std::shared_ptr<DBConnectionsPool> pool)
-        {
+        explicit UsersRepository(std::shared_ptr<DBConnectionsPool> pool) {
             this->pool = std::move(pool);
         }
+
         virtual ~UsersRepository() = default;
+
         virtual std::unique_ptr<model::User> get(PKey id);
-        virtual model::User create(const std::string& name, const std::string& username);
+
+        virtual model::User create(const std::string &name, const std::string &username);
+
         virtual bool drop(PKey id);
+
         virtual void update(PKey id,
-                std::optional<std::string> name,
-                std::optional<std::string> avatar);
+                            std::optional<std::string> name,
+                            std::optional<std::string> avatar);
+
+        virtual bool follow(PKey author, PKey addresser);
+
+        virtual bool unfollow(PKey author, PKey addresser);
+
     private:
         std::shared_ptr<DBConnectionsPool> pool;
         fake_twitter::sqlpp_models::TabUsers tabUsers;
+        fake_twitter::sqlpp_models::TabFollower tabFollower;
     };
-
-
 
     std::unique_ptr<model::User> UsersRepository::get(PKey id) {
         auto query = select(all_of(tabUsers)).from(tabUsers)
@@ -47,13 +59,13 @@ namespace fake_twitter::repository {
                                                          first.username.value(),
                                                          first.password_hash.value(),
                                                          first.avatar.value(),
-                                                         (size_t)first.followers_count.value(),
-                                                         (size_t)first.friends_count.value()});
+                                                         (size_t) first.followers_count.value(),
+                                                         (size_t) first.friends_count.value()});
 
         return user;
     }
 
-    model::User UsersRepository::create(const std::string& name, const std::string& username) {
+    model::User UsersRepository::create(const std::string &name, const std::string &username) {
         auto newid = pool->run(insert_into(tabUsers).set(
                 tabUsers.name = name,
                 tabUsers.username = username,
@@ -76,7 +88,7 @@ namespace fake_twitter::repository {
 
         // workaround to make dynamic update
         auto query = sqlpp::blank_update_t<sqlpp::sqlite3::connection>().single_table(tabUsers)
-                                                                        .dynamic_set();
+                .dynamic_set();
         if (name)
             query.assignments.add(tabUsers.name = name.value());
         if (avatar)
@@ -85,5 +97,23 @@ namespace fake_twitter::repository {
         pool->run(query.where(tabUsers.id == id));
     }
 
+    bool UsersRepository::follow(PKey author, PKey addresser) {
+        auto result = pool->run(select(all_of(tabFollower)).from(tabFollower)
+                .where(tabFollower.author == author && tabFollower.addresser == addresser));
+        if (result.empty()) {
+            std::cout << "true" << std::endl;
+            auto j = pool->run(insert_into(tabFollower).set(
+                    tabFollower.author = author,
+                    tabFollower.addresser = addresser));
+            return true;
+        }
+
+        std::cout << "false" << std::endl;
+        return false;
+    }
+
+    bool UsersRepository::unfollow(PKey author, PKey addresser) {
+        return pool->run(remove_from(tabFollower).where(tabFollower.author == author && tabFollower.addresser == addresser));
+    }
 
 } //end namespace fake_twitter::repository

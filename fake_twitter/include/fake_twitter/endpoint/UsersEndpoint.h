@@ -19,6 +19,9 @@ namespace fake_twitter::endpoints {
         void create(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
         void update(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
         void drop(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
+
+        void follow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
+        void unfollow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response);
     private:
         std::shared_ptr<repository::UsersRepository> usersRepository;
     };
@@ -89,6 +92,43 @@ namespace fake_twitter::endpoints {
         }
         auto id = std::stol(id_optional.get());
         if (usersRepository->drop(id))
+            response.send(Pistache::Http::Code::Ok);
+        else
+            response.send(Pistache::Http::Code::Bad_Request);
+    }
+
+    void UsersEndpoint::follow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
+    {
+        auto author_row = request.query().get("author");
+        auto addresser_row = request.query().get("addresser");
+        if (author_row.isEmpty() || addresser_row.isEmpty()) {
+            response.send(Pistache::Http::Code::Bad_Request, "Not found one or more parameters");
+            return;
+        }
+        auto author = std::stol(author_row.get());
+        auto addresser = std::stol(addresser_row.get());
+
+        if(author == addresser)
+            response.send(Pistache::Http::Code::Bad_Request);
+
+        if (usersRepository->follow(author, addresser))
+            response.send(Pistache::Http::Code::Ok);
+        else
+            response.send(Pistache::Http::Code::Bad_Request);
+    }
+
+    void UsersEndpoint::unfollow(const Pistache::Rest::Request &request, Pistache::Http::ResponseWriter response)
+    {
+        auto author_row = request.query().get("author");
+        auto addresser_row = request.query().get("addresser");
+        if (author_row.isEmpty() || addresser_row.isEmpty()) {
+            response.send(Pistache::Http::Code::Bad_Request, "Not found one or more parameters");
+            return;
+        }
+        auto author = std::stol(author_row.get());
+        auto addresser = std::stol(addresser_row.get());
+
+        if (usersRepository->unfollow(author, addresser))
             response.send(Pistache::Http::Code::Ok);
         else
             response.send(Pistache::Http::Code::Bad_Request);
