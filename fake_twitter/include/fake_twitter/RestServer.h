@@ -4,14 +4,16 @@
 #include <sqlpp11/sqlite3/sqlite3.h>
 #include <rapidjson/rapidjson.h>
 
-#include "fake_twitter/model/User.h"
-#include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/serializer/json.h"
-#include "fake_twitter/sqlpp_models/UsersTab.h"
-#include "fake_twitter/sqlpp_models/TweetsTab.h"
-#include "fake_twitter/repository/UsersRepository.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"
+
+#include "fake_twitter/model/User.h"
+#include "fake_twitter/sqlpp_models/UsersTab.h"
+//#include "fake_twitter/repository/UsersRepository.h"
 #include "fake_twitter/endpoint/UsersEndpoint.h"
+
+#include "fake_twitter/model/Tweet.h"
+#include "fake_twitter/sqlpp_models/TweetsTab.h"
 #include "fake_twitter/endpoint/TweetsEndpoint.h"
 
 #include "fake_twitter/model/Comment.h"
@@ -73,6 +75,9 @@ private:
         Routes::Put(router, "/0.0/users/update", Routes::bind(&UsersEndpoint::update, usersEndpoint));
         Routes::Delete(router, "/0.0/users/drop", Routes::bind(&UsersEndpoint::drop, usersEndpoint));
 
+        Routes::Post(router, "/0.0/user/follow", Routes::bind(&UsersEndpoint::follow, usersEndpoint));
+        Routes::Delete(router, "/0.0/user/unfollow", Routes::bind(&UsersEndpoint::unfollow, usersEndpoint));
+
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&CommentsEndpoint::show, commentsEndpoint));
        // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
         Routes::Post(router, "/0.0/CommentCreate/create", Routes::bind(&CommentsEndpoint::create, commentsEndpoint));
@@ -82,6 +87,7 @@ private:
         Routes::Get(router, "/0.0/tweets/show", Routes::bind(&TweetsEndpoint::show, tweetsEndpoint));
         Routes::Post(router, "/0.0/tweets/create", Routes::bind(&TweetsEndpoint::create, tweetsEndpoint));
         Routes::Delete(router, "/0.0/tweets/drop", Routes::bind(&TweetsEndpoint::drop, tweetsEndpoint));
+
     }
     std::shared_ptr<UsersEndpoint>  usersEndpoint;
     std::shared_ptr<repository::CommentsRepository> commentsRepository;
