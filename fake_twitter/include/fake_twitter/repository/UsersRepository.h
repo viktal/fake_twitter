@@ -46,8 +46,7 @@ namespace fake_twitter::repository {
     };
 
     std::unique_ptr<model::User> UsersRepository::get(PKey id) {
-        auto query = select(all_of(tabUsers)).from(tabUsers)
-                .where(tabUsers.id == id);
+        auto query = select(all_of(tabUsers)).from(tabUsers).where(tabUsers.id == id);
 
         auto result = pool->run(query);
         if (result.empty()) {
@@ -76,7 +75,8 @@ namespace fake_twitter::repository {
                 tabUsers.followers_count = 0,
                 tabUsers.avatar = "path"));
 
-        return std::move(model::User{PKey(newid), name, username, 123, "path", 0, 0});
+        return std::move(model::User{PKey(newid), name, username, 123,
+                                     "path", 0, 0});
     }
 
     bool UsersRepository::drop(PKey id) {
@@ -119,21 +119,45 @@ namespace fake_twitter::repository {
 
     bool UsersRepository::follow(PKey author, PKey addresser) {
         auto result = pool->run(select(all_of(tabFollower)).from(tabFollower)
-                .where(tabFollower.author == author && tabFollower.addresser == addresser));
+                                        .where(tabFollower.author == author &&
+                                               tabFollower.addresser == addresser));
         if (result.empty()) {
-            std::cout << "true" << std::endl;
-            auto j = pool->run(insert_into(tabFollower).set(
+
+            auto dummy2 = pool->run(sqlpp::update(tabUsers)
+                                            .set(tabUsers.followers_count = tabUsers.followers_count + 1)
+                                            .where(tabUsers.id == addresser));
+            if (!dummy2) {
+                return false;
+            }
+            dummy2 = pool->run(sqlpp::update(tabUsers).set(tabUsers.friends_count = tabUsers.friends_count + 1).where(
+                    tabUsers.id == author));
+
+            if (!dummy2) {
+                auto dummy = pool->run(sqlpp::update(tabUsers)
+                                               .set(tabUsers.followers_count = tabUsers.followers_count - 1)
+                                               .where(tabUsers.id == addresser));
+                return false;
+            }
+            auto dummy = pool->run(insert_into(tabFollower).set(
                     tabFollower.author = author,
                     tabFollower.addresser = addresser));
             return true;
         }
-
-        std::cout << "false" << std::endl;
         return false;
     }
 
     bool UsersRepository::unfollow(PKey author, PKey addresser) {
-        return pool->run(remove_from(tabFollower).where(tabFollower.author == author && tabFollower.addresser == addresser));
+        auto result = pool->run(
+                remove_from(tabFollower).
+                        where(tabFollower.author == author && tabFollower.addresser == addresser));
+        if (!result) return false;
+        auto dummy = pool->run(sqlpp::update(tabUsers)
+                                       .set(tabUsers.followers_count = tabUsers.followers_count - 1)
+                                       .where(tabUsers.id == addresser));
+
+        dummy = pool->run(sqlpp::update(tabUsers).set(tabUsers.friends_count = tabUsers.friends_count - 1).where(
+                tabUsers.id == author));
+        return true;
     }
 
 } //end namespace fake_twitter::repository

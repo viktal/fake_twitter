@@ -13,6 +13,8 @@
 //#include "fake_twitter/repository/UsersRepository.h"
 #include "fake_twitter/endpoint/UsersEndpoint.h"
 
+#include "fake_twitter/endpoint/NewsFeedEndpoint.h"
+
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
 #include "fake_twitter/endpoint/TweetsEndpoint.h"
@@ -27,6 +29,7 @@ using namespace fake_twitter;
 using fake_twitter::endpoints::UsersEndpoint;
 using fake_twitter::endpoints::TweetsEndpoint;
 using fake_twitter::endpoints::CommentsEndpoint;
+using fake_twitter::endpoints::NewsFeedEndpoint;
 namespace sql = sqlpp::sqlite3;
 
 class RestServer {
@@ -47,6 +50,9 @@ public:
 
         tweetsRepository = std::make_unique<repository::TweetsRepository>(connectionsPool);
         tweetsEndpoint = std::make_shared<TweetsEndpoint>(tweetsRepository);
+
+        newsFeedRepository = std::make_unique<repository::NewsFeedRepository>(connectionsPool);
+        newsFeedEndpoint = std::make_shared<NewsFeedEndpoint>(newsFeedRepository);
 
     }
 
@@ -77,12 +83,14 @@ private:
         Routes::Put(router, "/0.0/users/update", Routes::bind(&UsersEndpoint::update, usersEndpoint));
         Routes::Delete(router, "/0.0/users/drop", Routes::bind(&UsersEndpoint::drop, usersEndpoint));
 
+        Routes::Get(router, "/0.0/newsfeed/show", Routes::bind(&NewsFeedEndpoint::show, newsFeedEndpoint));
+
+        Routes::Post(router, "/0.0/users/follow", Routes::bind(&UsersEndpoint::follow, usersEndpoint));
+        Routes::Delete(router, "/0.0/users/unfollow", Routes::bind(&UsersEndpoint::unfollow, usersEndpoint));
         Routes::Get(router, "/0.0/followers/show", Routes::bind(&UsersEndpoint::showFollowTable, usersEndpoint));
-        Routes::Post(router, "/0.0/user/follow", Routes::bind(&UsersEndpoint::follow, usersEndpoint));
-        Routes::Delete(router, "/0.0/user/unfollow", Routes::bind(&UsersEndpoint::unfollow, usersEndpoint));
 
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&CommentsEndpoint::show, commentsEndpoint));
-       // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
+        // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
         Routes::Post(router, "/0.0/CommentCreate/create", Routes::bind(&CommentsEndpoint::create, commentsEndpoint));
         Routes::Put(router, "/0.0/CommentRaseLikes/update", Routes::bind(&CommentsEndpoint::RaseLikes, commentsEndpoint));
         Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&CommentsEndpoint::Delete, commentsEndpoint));
@@ -91,6 +99,8 @@ private:
         Routes::Post(router, "/0.0/tweets/create", Routes::bind(&TweetsEndpoint::create, tweetsEndpoint));
         Routes::Delete(router, "/0.0/tweets/drop", Routes::bind(&TweetsEndpoint::drop, tweetsEndpoint));
 
+        Routes::Post(router, "/0.0/tweets/like", Routes::bind(&TweetsEndpoint::like, tweetsEndpoint));
+        Routes::Delete(router, "/0.0/tweets/unlike", Routes::bind(&TweetsEndpoint::unlike, tweetsEndpoint));
     }
     std::shared_ptr<UsersEndpoint>  usersEndpoint;
     std::shared_ptr<repository::CommentsRepository> commentsRepository;
@@ -98,6 +108,8 @@ private:
     std::shared_ptr<TweetsEndpoint> tweetsEndpoint;
     std::shared_ptr<repository::TweetsRepository> tweetsRepository;
     std::shared_ptr<CommentsEndpoint> commentsEndpoint;
+    std::shared_ptr<NewsFeedEndpoint> newsFeedEndpoint;
+    std::shared_ptr<repository::NewsFeedRepository> newsFeedRepository;
     std::shared_ptr<Http::Endpoint> httpEndpoint;
     Rest::Router router;
 

@@ -4,6 +4,7 @@
 #include <optional>
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
+#include "fake_twitter/sqlpp_models/LikeTab.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"
 
 #include <memory>
@@ -20,15 +21,22 @@ namespace fake_twitter::repository {
         virtual ~TweetsRepository() = default;
 
         virtual std::unique_ptr<model::Tweet> get(PKey id);
+
         virtual model::Tweet create(const PKey &author, const std::string &body);
+
         virtual bool drop(PKey id);
 //        virtual void update(PKey id,
 //                            std::optional<std::string> name,
 //                            std::optional<std::string> avatar);
 
+        bool like(PKey author, PKey twit);
+
+        bool unlike(PKey author, PKey twit);
+
     private:
         std::shared_ptr<DBConnectionsPool> pool;
         fake_twitter::sqlpp_models::TabTweets tabTweets;
+        fake_twitter::sqlpp_models::TabLikes tabLikes;
     };
 
     std::unique_ptr<model::Tweet> TweetsRepository::get(PKey id) {
@@ -43,8 +51,8 @@ namespace fake_twitter::repository {
         auto &first = result.front();
         std::unique_ptr<model::Tweet> tweet;
         tweet = std::make_unique<model::Tweet>(model::Tweet{first.id.value(),
-                                                         first.body.value(),
-                                                         first.author.value()});
+                                                            first.body.value(),
+                                                            first.author.value()});
 
         return tweet;
     }
@@ -63,6 +71,41 @@ namespace fake_twitter::repository {
 
         return std::move(model::Tweet{PKey(newid), body, PKey(author), "12.12.12", 0, 0});
 
+    }
+
+    bool TweetsRepository::like(PKey author, PKey twit) {
+        auto result = pool->run(select(all_of(tabLikes)).from(tabLikes)
+                                        .where(tabLikes.author == author &&
+                                               tabLikes.twit == twit));
+        if (result.empty()) {
+            auto dummy2 = pool->run(sqlpp::update(tabTweets)
+                                            .set(tabTweets.rating = tabTweets.rating + 1)
+                                            .where(tabTweets.id == twit));
+            if (!dummy2) {
+                return false;
+            }
+
+            auto dummy = pool->run(insert_into(tabLikes).set(
+                    tabLikes.author = author,
+                    tabLikes.twit = twit));
+            return true;
+        }
+        return false;
+    }
+
+    bool TweetsRepository::unlike(PKey author, PKey twit) {
+        auto result = pool->run(
+                remove_from(tabLikes).
+                        where(tabLikes.author == author && tabLikes.twit == twit));
+        if (!result) return false;
+        auto dummy = pool->run(sqlpp::update(tabTweets)
+                                       .set(tabTweets.rating = tabTweets.rating - 1)
+                                       .where(tabTweets.id == twit));
+
+        dummy = pool->run(sqlpp::update(tabTweets)
+                                  .set(tabTweets.rating = tabTweets.rating - 1)
+                                  .where(tabTweets.id == author));
+        return true;
     }
 
 } // end namespace fake_twitter::repository
