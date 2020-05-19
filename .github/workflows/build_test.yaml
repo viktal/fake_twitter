@@ -17,7 +17,14 @@ jobs:
           git submodule update --init --recursive
           git-lfs pull
       - name: Install CMake
-        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev
+        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev postgresql postgresql-contrib
+      - name: Create db
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: '11'
+          postgresql user: 'twituser'
+          postgresql password: '123'
+          postgresql db: 'twitdb'
       - name: Build binary
         run:  mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-9 .. && cmake --build .
       - name: Run tests
