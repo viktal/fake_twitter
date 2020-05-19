@@ -13,7 +13,7 @@ jobs:
       - name: clang-format
         run:  |
           wget https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py
-          sudo cmod a+x run-clang-format.py
+          sudo chmod a+x run-clang-format.py
           ./run-clang-format.py -r --exclude third_party tests fake_twitter
   cpplint:
     name: Run cpplint
