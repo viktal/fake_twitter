@@ -46,7 +46,8 @@ public:
     void TearDown() override {
         server->shutdown();
         client->shutdown();
-        if (std::filesystem::exists(TMP_DB_NAME)) std::remove(TMP_DB_NAME.c_str());
+        if (std::filesystem::exists(TMP_DB_NAME))
+            std::remove(TMP_DB_NAME.c_str());
     }
 };
 
@@ -73,13 +74,14 @@ std::vector<model::User> make_users(Http::Client& client, int N) {
         auto response = client.post(posturl).send();
         response.then(
             [userToInsert, &lock, &insertedUsers](Http::Response rsp) {
-              EXPECT_EQ(rsp.code(), Http::Code::Ok);
-              auto insertedUser = serialization::from_json<model::User>(rsp.body());
-              EXPECT_EQ(insertedUser.name, userToInsert.name);
-              EXPECT_EQ(insertedUser.username, userToInsert.username);
+                EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                auto insertedUser =
+                    serialization::from_json<model::User>(rsp.body());
+                EXPECT_EQ(insertedUser.name, userToInsert.name);
+                EXPECT_EQ(insertedUser.username, userToInsert.username);
 
-              std::lock_guard<std::mutex> guard(lock);
-              insertedUsers.push_back(std::move(insertedUser));
+                std::lock_guard<std::mutex> guard(lock);
+                insertedUsers.push_back(std::move(insertedUser));
             },
             onfail);
         responses.push_back(std::move(response));
@@ -124,13 +126,14 @@ void select_users(Http::Client& client, const std::vector<model::User>& users,
         auto response = client.get(geturl).send();
         response.then(
             [user, &expect_fail](Http::Response rsp) {
-              if (expect_fail)
-                  EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
-              else {
-                  EXPECT_EQ(rsp.code(), Http::Code::Ok);
-                  auto dbUser = serialization::from_json<model::User>(rsp.body());
-                  EXPECT_EQ(dbUser, user);
-              }
+                if (expect_fail)
+                    EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
+                else {
+                    EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                    auto dbUser =
+                        serialization::from_json<model::User>(rsp.body());
+                    EXPECT_EQ(dbUser, user);
+                }
             },
             onfail);
         responses.push_back(std::move(response));
@@ -149,10 +152,10 @@ void drop(Http::Client& client, const std::vector<model::User>& users,
         auto response = client.del(delurl).send();
         response.then(
             [&](Http::Response rsp) {
-              if (expect_fail)
-                  EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
-              else
-                  EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                if (expect_fail)
+                    EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
+                else
+                    EXPECT_EQ(rsp.code(), Http::Code::Ok);
             },
             onfail);
         responses.push_back(std::move(response));

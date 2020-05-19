@@ -11,7 +11,7 @@ set(SOURCES
         src/endpoint/NewsFeedEndpoint.cpp
         src/model/User.cpp
         src/RestServer.cpp
-)
+        )
 
 add_library(fake_twitter STATIC ${SOURCES})
 target_include_directories(fake_twitter PUBLIC include)

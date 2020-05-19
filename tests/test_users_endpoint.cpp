@@ -1,9 +1,8 @@
-#include "fake_twitter/endpoint/UsersEndpoint.h"
-
 #include <gtest/gtest.h>
 
 #include "EndpointTest.h"
 #include "RepositoryMocks.h"
+#include "fake_twitter/endpoint/UsersEndpoint.h"
 #include "fake_twitter/fake.h"
 #include "fake_twitter/serializer/json.h"
 
@@ -70,7 +69,7 @@ TEST_F(UsersEndpointTest, Create) {
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
 }
 
-//TEST_F(UsersEndpointTest, Update) {
+// TEST_F(UsersEndpointTest, Update) {
 //    Rest::Routes::Post(
 //        router, "/update",
 //        Rest::Routes::bind(&UsersEndpoint::update, usersEndpoint));
