@@ -1,0 +1,84 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: "fake_twitter"
+
+paths:
+  #  0.0/users/show:
+  #    get:
+  #  0.0/users/create:
+  #    post:
+  #  0.0/users/update:
+  #    update:
+  #  0.0/users/drop:
+  #    delete:
+  /0.0/tweets/show:
+    parameters:
+      - name: id
+        in: query
+        schema:
+          type: string
+    get:
+      summary: "Show new tweet by id"
+      responses:
+        200:
+          description: "Get tweet"
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: integer
+                  body:
+                    type: string
+                  author:
+                    type: integer
+                  create_date:
+                    type: string
+                  rating:
+                    type: integer
+                  retweets:
+                    type: integer
+        400:
+          description: "No id parameter"
+
+  /0.0/tweets/create:
+    post:
+      summary: "Create new tweet"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                body:
+                  type: string
+      responses:
+        200:
+          description: "tweet created"
+        400:
+          description: "Not found one or more parameters"
+
+
+#  0.0/tweets/drop:
+#    delete:
+#
+#
+#  0.0/newsfeed/show:
+#
+#  0.0/users/follow:
+#
+#  0.0/users/unfollow:
+#
+#  0.0/followers/show:
+#
+#  0.0/comments/show.json:
+#
+#  0.0/CommentCreate/create:
+#
+#  0.0/CommentRaseLikes/update:
+#
+#  0.0/commentDelete/delete:
+#
+#  0.0/tweets/like:
+#
+#  0.0/tweets/unlike:

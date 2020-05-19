@@ -17,10 +17,20 @@ int main(int argc, char *argv[]) {
 //    cout << "Cores = " << hardware_concurrency() << endl;
 //    cout << "Using " << thr << " threads" << endl;
     std::cout << "Start server" << std::endl;
+
+
+//    auto config = std::make_shared<sqlpp::postgresql::connection_config>();
+//    config->host = "127.0.0.1";
+//    config->user = "twituser";
+//    config->password = "123";
+//    config->dbname = "twitdb";
+//    config->debug = true;
+
     sql::connection_config config;
-//    config.path_to_database = ":memory:";
-    config.path_to_database = "/tmp/db.sqlite";
-    config.flags = SQLITE_OPEN_READWRITE;
+    config.host = "127.0.0.1";
+    config.user = "twituser";
+    config.password = "123";
+    config.dbname = "twitdb";
     config.debug = true;
 
     RestServer stats(addr, config);

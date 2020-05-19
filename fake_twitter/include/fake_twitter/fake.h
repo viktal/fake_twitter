@@ -5,7 +5,8 @@
 #include <string>
 #include <algorithm>
 
-#include <sqlpp11/sqlite3/sqlite3.h>
+#include <sqlpp11/postgresql/postgresql.h>
+//#include <sqlpp11/sqlite3/sqlite3.h>
 
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/common.h"
@@ -69,33 +70,123 @@ namespace fake_twitter::fake {
 
     }
 
-    void sqlite3tables(sqlpp::sqlite3::connection &db) {
-        db.execute("CREATE TABLE Users (\n"
-                   "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-                   "\tname varchar,\n"
-                   "\tusername varchar,\n"
-                   "\tpassword_hash integer,\n"
-                   "\tavatar string,\n"
-                   "\tfollowers_count integer,\n"
-                   "\tfriends_count integer\n"
-                   ");\n");
+    void postgresql_tables(sqlpp::postgresql::connection &db) {
 
-        db.execute("CREATE TABLE Tweets (\n"
-                   "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-                   "\tbody string,\n"
-                   "\tauthor integer,\n"
-                   "\tcreate_date datetime,\n"
-                   "\trating integer,\n"
-                   "\tretweets integer\n"
-                   ");\n");
+        db.execute("CREATE TABLE Users (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"name\" varchar(255) NOT NULL,\n"
+                   "        \"username\" varchar(255) NOT NULL UNIQUE,\n"
+                   "        \"password_hash\" integer NOT NULL,\n"
+                   "        \"avatar\" VARCHAR(255) NOT NULL,\n"
+                   "        \"followers_count\" integer NOT NULL DEFAULT '0',\n"
+                   "        \"friends_count\" integer NOT NULL DEFAULT '0',\n"
+                   "        CONSTRAINT \"Users_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "CREATE TABLE Tweets (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"body\" VARCHAR(255) NOT NULL,\n"
+                   "        \"author\" integer NOT NULL,\n"
+                   "        \"create_date\" TIMESTAMP NOT NULL,\n"
+                   "        \"rating\" integer NOT NULL,\n"
+                   "        \"retweets\" integer NOT NULL,\n"
+                   "        CONSTRAINT \"Tweets_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "CREATE TABLE Comments (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"body\" TEXT NOT NULL,\n"
+                   "        \"create_date\" TIMESTAMP NOT NULL,\n"
+                   "        \"rating\" integer NOT NULL,\n"
+                   "        \"author\" integer NOT NULL,\n"
+                   "        \"comment_for\" integer NOT NULL,\n"
+                   "        CONSTRAINT \"Comments_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "CREATE TABLE UserFollower (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"UserID\" integer NOT NULL,\n"
+                   "        \"FollowsOn\" integer NOT NULL,\n"
+                   "        CONSTRAINT \"UserFollower_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "CREATE TABLE Tag (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"title\" VARCHAR(30) NOT NULL,\n"
+                   "        CONSTRAINT \"Tag_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "CREATE TABLE TagTweet (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"tweetID\" integer NOT NULL,\n"
+                   "        \"tagID\" integer NOT NULL,\n"
+                   "        CONSTRAINT \"TagTweet_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "CREATE TABLE LikeTweet (\n"
+                   "        \"id\" serial NOT NULL,\n"
+                   "        \"userID\" integer NOT NULL,\n"
+                   "        \"tweetID\" integer NOT NULL,\n"
+                   "        CONSTRAINT \"LikeTweet_pk\" PRIMARY KEY (\"id\")\n"
+                   ") WITH (\n"
+                   "  OIDS=FALSE\n"
+                   ");\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "\n"
+                   "ALTER TABLE Tweets ADD CONSTRAINT \"Tweets_fk0\" FOREIGN KEY (\"author\") REFERENCES Users(\"id\");\n"
+                   "\n"
+                   "ALTER TABLE Comments ADD CONSTRAINT \"Comments_fk0\" FOREIGN KEY (\"author\") REFERENCES Users(\"id\");\n"
+                   "ALTER TABLE Comments ADD CONSTRAINT \"Comments_fk1\" FOREIGN KEY (\"comment_for\") REFERENCES Tweets(\"id\");\n"
+                   "\n"
+                   "ALTER TABLE UserFollower ADD CONSTRAINT \"UserFollower_fk0\" FOREIGN KEY (\"UserID\") REFERENCES Users(\"id\");\n"
+                   "ALTER TABLE UserFollower ADD CONSTRAINT \"UserFollower_fk1\" FOREIGN KEY (\"FollowsOn\") REFERENCES Users(\"id\");\n"
+                   "\n"
+                   "\n"
+                   "ALTER TABLE TagTweet ADD CONSTRAINT \"TagTweet_fk0\" FOREIGN KEY (\"tweetID\") REFERENCES Tweets(\"id\");\n"
+                   "ALTER TABLE TagTweet ADD CONSTRAINT \"TagTweet_fk1\" FOREIGN KEY (\"tagID\") REFERENCES Tag(\"id\");\n"
+                   "\n"
+                   "ALTER TABLE LikeTweet ADD CONSTRAINT \"LikeTweet_fk0\" FOREIGN KEY (\"userID\") REFERENCES Tweets(\"id\");\n"
+                   "ALTER TABLE LikeTweet ADD CONSTRAINT \"LikeTweet_fk1\" FOREIGN KEY (\"tweetID\") REFERENCES Users(\"id\");\n"
+                   "");
     }
 
-    void sqlite3tables(std::string path_to_db, bool debug = false) {
-        sqlpp::sqlite3::connection_config config;
-        config.path_to_database = path_to_db;
-        config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
-        config.debug = debug;
-        sqlpp::sqlite3::connection db(config);
-        sqlite3tables(db);
+//    void sqlite3tables(std::string path_to_db, bool debug = false) {
+//        sqlpp::sqlite3::connection_config config;
+//        config.path_to_database = path_to_db;
+//        config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+//        config.debug = debug;
+//        sqlpp::sqlite3::connection db(config);
+//        sqlite3tables(db);
+//    }
+
+    void postgresql_tables(const std::shared_ptr<sqlpp::postgresql::connection_config>& config) {
+        sqlpp::postgresql::connection db(config);
+        postgresql_tables(db);
     }
 }
