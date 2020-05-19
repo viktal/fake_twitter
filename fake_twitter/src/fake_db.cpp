@@ -31,6 +31,7 @@ int main() {
 //    config.options
 //    config.path_to_database = "/tmp/db.sqlite";
 //    config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+
     config->debug = true;
     sqlpp::postgresql::connection db(config);
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;

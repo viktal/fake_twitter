@@ -32,3 +32,4 @@ jobs:
           cd build/tests
           valgrind --leak-check=full --leak-resolution=med ./integration_test
           valgrind --leak-check=full --leak-resolution=med ./test_json
+          valgrind --leak-check=full --leak-resolution=med ./test_users_endpoint
