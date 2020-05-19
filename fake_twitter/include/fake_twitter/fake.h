@@ -185,13 +185,7 @@ namespace fake_twitter::fake {
 //        sqlite3tables(db);
 //    }
 
-    void postgresql_tables(std::string dbname) {
-        auto config = std::make_shared<sqlpp::postgresql::connection_config>();
-        config->host = "127.0.0.1";
-        config->user = "twituser";
-        config->password = "123";
-        config->dbname = dbname;
-        config->debug = true;
+    void postgresql_tables(const std::shared_ptr<sqlpp::postgresql::connection_config>& config) {
         sqlpp::postgresql::connection db(config);
         postgresql_tables(db);
     }

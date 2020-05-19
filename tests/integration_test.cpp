@@ -6,7 +6,7 @@
 
 using namespace Pistache;
 using namespace fake_twitter;
-const std::string TMP_DB_NAME = "twitdb_test";
+const std::string TMP_DB_NAME = "twitdb";
 const std::string ADDRESS = "127.0.0.1";
 const int PORT = 8888;
 
@@ -17,10 +17,14 @@ public:
     std::unique_ptr<Http::Client> client;
 
     void SetUp() override {
-        if (std::filesystem::exists(TMP_DB_NAME))
-            std::remove(TMP_DB_NAME.c_str());
+        sql::connection_config config;
+        config.host = "127.0.0.1";
+        config.user = "twituser";
+        config.password = "123";
+        config.dbname = TMP_DB_NAME;
+        config.debug = false;
 
-        fake::postgresql_tables(TMP_DB_NAME);
+        fake::postgresql_tables(std::make_shared<sqlpp::postgresql::connection_config>(config));
 
         Port port(PORT);
         Address addr(ADDRESS, port);
@@ -28,13 +32,6 @@ public:
         auto opts = Http::Endpoint::options()
                 .threads(4)
                 .flags(Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
-
-        sql::connection_config config;
-        config.host = "127.0.0.1";
-        config.user = "twituser";
-        config.password = "123";
-        config.dbname = TMP_DB_NAME;
-        config.debug = false;
 
         server = std::make_unique<RestServer>(addr, config);
         server->init(opts);
