@@ -7,6 +7,7 @@
 #include "fake_twitter/model/Followers.h"
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"
+#include "vector"
 
 #include <memory>
 #include <utility>
@@ -21,7 +22,7 @@ namespace fake_twitter::repository {
 
         virtual ~NewsFeedRepository() = default;
 
-        virtual std::unique_ptr<model::Tweet> get(PKey id);
+        virtual std::vector<model::Tweet> get(PKey id);
 
     private:
         std::shared_ptr<DBConnectionsPool> pool;
@@ -29,29 +30,34 @@ namespace fake_twitter::repository {
         fake_twitter::sqlpp_models::TabFollower tabFollower;
     };
 
-    std::unique_ptr<model::Tweet> NewsFeedRepository::get(PKey id) {
+    std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
         auto queryFollower = select(all_of(tabFollower)).from(tabFollower)
                 .where(tabFollower.author == id);
+        std::vector<model::Tweet> tweet_vector;
         auto resultFollower = pool->run(queryFollower);
         if (resultFollower.empty()) {
-            return nullptr;
+            return tweet_vector;
         }
-        auto &firstFollower = resultFollower.front();
-        auto queryTweet = select(all_of(tabTweets)).from(tabTweets)
-                .where(tabTweets.author == firstFollower.addresser.value());
+        while(!resultFollower.empty()) {
+            auto &firstFollower = resultFollower.front();
+            auto queryTweet = select(all_of(tabTweets)).from(tabTweets)
+                    .where(tabTweets.author == firstFollower.addresser.value());
 
-        auto resultTweet = pool->run(queryTweet);
-        if (resultTweet.empty()) {
-            return nullptr;
+            auto resultTweet = pool->run(queryTweet);
+            if (resultTweet.empty()) {
+                return tweet_vector;
+            }
+            while (!resultTweet.empty()) {
+                auto &firstTweet = resultTweet.front();
+                model::Tweet t = {firstTweet.id.value(),
+                     firstTweet.body.value(),
+                     firstTweet.author.value()};
+                tweet_vector.push_back(t);
+                resultTweet.pop_front();
+            }
+            resultFollower.pop_front();
         }
-
-        auto &firstTweet = resultTweet.front();
-        std::unique_ptr<model::Tweet> tweet;
-        tweet = std::make_unique<model::Tweet>(model::Tweet{firstTweet.id.value(),
-                                                            firstTweet.body.value(),
-                                                            firstTweet.author.value()});
-
-        return tweet;
+        return tweet_vector;
     }
 }
 

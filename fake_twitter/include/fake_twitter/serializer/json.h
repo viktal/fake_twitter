@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <vector>
 #include <rapidjson/document.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
@@ -8,6 +9,7 @@
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/model/Followers.h"
+
 
 
 using namespace rapidjson;
@@ -75,6 +77,19 @@ namespace fake_twitter::serialization {
 
 //        return "";
         return buffer.GetString();
+    }
+
+    std::string to_json(std::vector<model::Tweet> tweetVector) {
+        std::string str = "{\"tweets\" :["; // + "," + "]}";
+        while (!tweetVector.empty()) {
+            str = str + serialization::to_json(tweetVector.back());
+            if (tweetVector.size() > 1) {
+                str = str + ",";
+            }
+            tweetVector.pop_back();
+        }
+        str = str + "]}";
+        return str;
     }
 
     std::string to_json(model::Followers followers) {

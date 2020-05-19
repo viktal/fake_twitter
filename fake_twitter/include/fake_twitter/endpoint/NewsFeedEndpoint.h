@@ -27,13 +27,13 @@ namespace fake_twitter::endpoints {
             return;
         }
         auto id = std::stol(id_optional.get());
-        std::unique_ptr<model::Tweet> tweet = newsFeedRepository->get(id);
-        if (!tweet) {
+        std::vector<model::Tweet> tweetVector = newsFeedRepository->get(id);
+        if (tweetVector.empty()) {
             response.send(Pistache::Http::Code::Bad_Request, "No followers with this id");
             return;
-        } else {
-            response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
-            response.send(Pistache::Http::Code::Ok, serialization::to_json(*tweet));
         }
+        response.headers().add<Pistache::Http::Header::ContentType>(MIME(Application, Json));
+        response.send(Pistache::Http::Code::Ok, serialization::to_json(tweetVector));
+
     }
 }
