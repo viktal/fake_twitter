@@ -2,16 +2,19 @@ name: Linux builds
 on: [pull_request, push]
 
 jobs:
-  cppcheck:
-    name: Run cppcheck
+  clang-format:
+    name: Run clang-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2.0.0
-      - name: Install cppcheck
-        run:  sudo apt-get update && sudo apt-get install -y cppcheck
-      - name: cppcheck
-        run: cppcheck --quiet --enable=all --language=c++ -i third_party .
+      - name: Install clang-format
+        run:  sudo apt-get update && sudo apt-get install -y clang-format-9
+      - name: clang-format
+        run:  |
+          wget https://raw.githubusercontent.com/Sarcasm/run-clang-format/master/run-clang-format.py
+          sudo cmod a+x run-clang-format.py
+          ./run-clang-format.py -r --exclude third_party tests fake_twitter
   cpplint:
     name: Run cpplint
     runs-on: ubuntu-latest
