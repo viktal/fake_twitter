@@ -158,7 +158,6 @@ void drop(Http::Client& client, const std::vector<model::User>& users, bool expe
     awaitall(responses);
 }
 
-
 TEST_F(test_fixture_restserver, test_many_users_create_show) {
     const int N = 100;
 
