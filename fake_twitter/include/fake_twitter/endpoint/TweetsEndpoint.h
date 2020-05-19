@@ -1,5 +1,4 @@
 #pragma once
-
 #include <pistache/router.h>
 #include <sqlpp11/sqlpp11.h>
 

@@ -16,3 +16,6 @@
 [submodule "third_party/sqlpp11-connector-sqlite3"]
 	path = third_party/sqlpp11-connector-sqlite3
 	url = https://github.com/rbock/sqlpp11-connector-sqlite3
+[submodule "third_party/sqlpp11-connector-postgresql"]
+	path = third_party/sqlpp11-connector-postgresql
+	url = https://github.com/matthijs/sqlpp11-connector-postgresql
