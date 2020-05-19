@@ -2,7 +2,6 @@
 
 using namespace fake_twitter;
 using namespace fake_twitter::repository;
-
 std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
     auto queryFollower = select(all_of(tabFollower))
                              .from(tabFollower)
@@ -34,6 +33,7 @@ std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
     }
     return tweet_vector;
 }
+
 NewsFeedRepository::NewsFeedRepository(
     std::shared_ptr<DBConnectionsPool> pool) {
     this->pool = std::move(pool);
