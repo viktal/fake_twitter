@@ -17,7 +17,7 @@ jobs:
           git submodule update --init --recursive
           git-lfs pull
       - name: Install CMake
-        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev
+        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev postgresql-server-dev-11
       - name: Create db
         uses: harmon758/postgresql-action@v1
         with:
