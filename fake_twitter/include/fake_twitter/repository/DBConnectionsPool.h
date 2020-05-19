@@ -7,10 +7,10 @@ namespace fake_twitter::repository {
 
 // TODO: Более разумная многопоточность, сейчас только 1 поток и все
 // TODO: Шаблонный класс, относительнло sqlpp connection
-template<typename ConnectionT>
+
 class DBConnectionsPool {
 public:
-    explicit DBConnectionsPool(std::unique_ptr<ConnectionT> connection)  {
+    explicit DBConnectionsPool(std::unique_ptr<sqlpp::postgresql::connection> connection)  {
         this->connection = std::move(connection);
     }
 
@@ -23,6 +23,6 @@ public:
 
 private:
     std::mutex lock;
-    std::unique_ptr<ConnectionT> connection;
+    std::unique_ptr<sqlpp::postgresql::connection> connection;
 };
 }

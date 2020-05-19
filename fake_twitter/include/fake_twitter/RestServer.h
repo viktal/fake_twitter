@@ -3,6 +3,7 @@
 #include <pistache/endpoint.h>
 //#include <sqlpp11/sqlite3/sqlite3.h>
 #include <sqlpp11/postgresql/connection.h>
+#include <sqlpp11/postgresql/postgresql.h>
 #include <rapidjson/rapidjson.h>
 
 #include "fake_twitter/serializer/json.h"
@@ -30,17 +31,16 @@ using fake_twitter::endpoints::UsersEndpoint;
 using fake_twitter::endpoints::TweetsEndpoint;
 using fake_twitter::endpoints::CommentsEndpoint;
 using fake_twitter::endpoints::NewsFeedEndpoint;
-namespace sql = sqlpp::sqlite3;
+namespace sql = sqlpp::postgresql;
 
 class RestServer {
 public:
-    RestServer(Address addr, sql::connection_config config) {
+    RestServer(Address addr, const sql::connection_config& config) {
         httpEndpoint = std::make_shared<Http::Endpoint>(addr);
-//        db = std::make_unique<sql::connection>(config);
 
-        auto connection = std::make_unique<sqlpp::sqlite3::connection>(config);
-        auto connectionsPool = std::make_shared<repository::DBConnectionsPool
-                                <sqlpp::postgresql::connection>>(std::move(connection));
+        auto config_ptr = std::make_shared<sql::connection_config>(config);
+        auto connection = std::make_unique<sqlpp::postgresql::connection>(config_ptr);
+        auto connectionsPool = std::make_shared<repository::DBConnectionsPool>(std::move(connection));
 
         commentsRepository = std::make_unique<repository::CommentsRepository>(connectionsPool);
         commentsEndpoint = std::make_shared<CommentsEndpoint>(commentsRepository);
@@ -56,7 +56,7 @@ public:
 
     }
 
-    void init(Http::Endpoint::Options options) {
+    void init(const Http::Endpoint::Options& options) {
         httpEndpoint->init(options);
         setupRoutes();
         httpEndpoint->setHandler(router.handler());
@@ -90,7 +90,6 @@ private:
         Routes::Get(router, "/0.0/followers/show", Routes::bind(&UsersEndpoint::showFollowTable, usersEndpoint));
 
         Routes::Get(router, "/0.0/comments/show.json", Routes::bind(&CommentsEndpoint::show, commentsEndpoint));
-        // Routes::Get(router, "/0.0/commentsfortweet/show.json", Routes::bind(&CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
         Routes::Post(router, "/0.0/CommentCreate/create", Routes::bind(&CommentsEndpoint::create, commentsEndpoint));
         Routes::Put(router, "/0.0/CommentRaseLikes/update", Routes::bind(&CommentsEndpoint::RaseLikes, commentsEndpoint));
         Routes::Delete(router, "/0.0/commentDelete/delete", Routes::bind(&CommentsEndpoint::Delete, commentsEndpoint));

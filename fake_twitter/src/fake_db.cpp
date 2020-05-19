@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-namespace sql = sqlpp::sqlite3;
+namespace sql = sqlpp::postgresql;
 using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabUsers;
 using fake_twitter::sqlpp_models::TabTweets;
@@ -20,37 +20,45 @@ using fake_twitter::sqlpp_models::TabLikes;
 
 
 int main() {
-    sql::connection_config config;
+
+    auto config = std::make_shared<sqlpp::postgresql::connection_config>();
+
 //    config.path_to_database = ":memory:";
-    config.path_to_database = "/tmp/db.sqlite";
-    config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
-    config.debug = true;
-
-    sql::connection db(config);
+    config->host = "127.0.0.1";
+    config->user = "twituser";
+    config->password = "123";
+    config->dbname = "twitdb";
+//    config.options
+//    config.path_to_database = "/tmp/db.sqlite";
+//    config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+    config->debug = true;
+    sqlpp::postgresql::connection db(config);
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
-    fake_twitter::fake::sqlite3tables(db);
+    fake_twitter::fake::postgresql_tables(db);
 
-    db.execute("CREATE TABLE Likes (\n"
-               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-               "\tauthor integer,\n"
-               "\ttwit integer\n"
-               ");\n");
+    TabUsers tabUsers;
+    db(insert_into(tabUsers).set(
+            tabUsers.name = "twitter",
+            tabUsers.username = "twitter",
+            tabUsers.password_hash = 123,
+            tabUsers.friends_count = 0,
+            tabUsers.followers_count = 0,
+            tabUsers.avatar = "path"));
 
-    db.execute("CREATE TABLE Follower (\n"
-               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-               "\tauthor integer,\n"
-               "\taddresser integer\n"
-               ");\n");
+    TabTweets tabTweets;
+    db(insert_into(tabTweets).set(
+            tabTweets.body = "twittertwittertwitter",
+            tabTweets.create_date = std::chrono::system_clock::now(),
+            tabTweets.author = 1,
+            tabTweets.retweets = 0,
+            tabTweets.rating = 0));
 
-    db.execute("CREATE TABLE Comments (\n"
-               "\tid integer PRIMARY KEY AUTOINCREMENT,\n"
-               "\tbody text,\n"
-               "\tcreate_date datetime,\n"
-               "\trating integer,\n"
-               "\tauthor string,\n"
-               "\tcomment_for integer\n"
-               ");\n");
-
+    db(insert_into(tabTweets).set(
+                tabTweets.body = "twittertwittertwitter2",
+                tabTweets.create_date = std::chrono::system_clock::now(),
+                tabTweets.author = 1,
+                tabTweets.retweets = 0,
+                tabTweets.rating = 0));
 
     TabComments tabComments;
     db(insert_into(tabComments).set(
@@ -74,6 +82,7 @@ int main() {
             tabComments.author = 1,
             tabComments.comment_for = 2,
             tabComments.rating = 0));
+
     for (const auto &row : db(select(all_of(tabComments)).from(tabComments).unconditionally())) {
         std::cout << row.id << " " <<
                   row.body << " " <<
@@ -82,31 +91,6 @@ int main() {
                   row.comment_for << " " <<
                   row.rating << " " << std::endl;
     };
-
-    TabUsers tabUsers;
-    db(insert_into(tabUsers).set(
-            tabUsers.name = "twitter",
-            tabUsers.username = "twitter",
-            tabUsers.password_hash = 123,
-            tabUsers.friends_count = 0,
-            tabUsers.followers_count = 0,
-            tabUsers.avatar = "path"));
-
-    db(insert_into(tabUsers).set(
-            tabUsers.name = "twitter2",
-            tabUsers.username = "twitter2",
-            tabUsers.password_hash = 123,
-            tabUsers.friends_count = 0,
-            tabUsers.followers_count = 0,
-            tabUsers.avatar = "path"));
-
-    TabTweets tabTweets;
-    db(insert_into(tabTweets).set(
-            tabTweets.body = "twittertwittertwitter",
-            tabTweets.create_date = std::chrono::system_clock::now(),
-            tabTweets.author = 1,
-            tabTweets.retweets = 0,
-            tabTweets.rating = 0));
 
     TabFollower tabFollower;
 //    db(insert_into(tabFollower).set(

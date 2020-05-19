@@ -89,7 +89,7 @@ namespace fake_twitter::repository {
             return;
 
         // workaround to make dynamic update
-        auto query = sqlpp::blank_update_t<sqlpp::sqlite3::connection>().single_table(tabUsers)
+        auto query = sqlpp::blank_update_t<sqlpp::postgresql::connection>().single_table(tabUsers)
                 .dynamic_set();
         if (name)
             query.assignments.add(tabUsers.name = name.value());
