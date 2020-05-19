@@ -67,15 +67,15 @@ namespace fake_twitter::repository {
     }
 
     model::User UsersRepository::create(const std::string &name, const std::string &username) {
-        auto newid = pool->run(insert_into(tabUsers).set(
+        auto newid = pool->run(sqlpp::postgresql::insert_into(tabUsers).set(
                 tabUsers.name = name,
                 tabUsers.username = username,
                 tabUsers.password_hash = 123,
                 tabUsers.friends_count = 0,
                 tabUsers.followers_count = 0,
-                tabUsers.avatar = "path"));
+                tabUsers.avatar = "path").returning(tabUsers.id));
 
-        return std::move(model::User{PKey(newid), name, username, 123,
+        return std::move(model::User{PKey(newid.front().id.value()), name, username, 123,
                                      "path", 0, 0});
     }
 

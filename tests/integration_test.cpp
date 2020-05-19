@@ -6,7 +6,7 @@
 
 using namespace Pistache;
 using namespace fake_twitter;
-const std::string TMP_SQLITE_DB_PATH = "/tmp/tmp-tests-db.sqlite";
+const std::string TMP_DB_NAME = "twitdb_test";
 const std::string ADDRESS = "127.0.0.1";
 const int PORT = 8888;
 
@@ -17,10 +17,10 @@ public:
     std::unique_ptr<Http::Client> client;
 
     void SetUp() override {
-        if (std::filesystem::exists(TMP_SQLITE_DB_PATH))
-            std::remove(TMP_SQLITE_DB_PATH.c_str());
+        if (std::filesystem::exists(TMP_DB_NAME))
+            std::remove(TMP_DB_NAME.c_str());
 
-        fake::sqlite3tables(TMP_SQLITE_DB_PATH);
+        fake::postgresql_tables(TMP_DB_NAME);
 
         Port port(PORT);
         Address addr(ADDRESS, port);
@@ -30,8 +30,10 @@ public:
                 .flags(Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
 
         sql::connection_config config;
-        config.path_to_database = TMP_SQLITE_DB_PATH;
-        config.flags = SQLITE_OPEN_READWRITE;
+        config.host = "127.0.0.1";
+        config.user = "twituser";
+        config.password = "123";
+        config.dbname = TMP_DB_NAME;
         config.debug = false;
 
         server = std::make_unique<RestServer>(addr, config);
@@ -46,8 +48,8 @@ public:
     void TearDown() override {
         server->shutdown();
         client->shutdown();
-        if (std::filesystem::exists(TMP_SQLITE_DB_PATH))
-            std::remove(TMP_SQLITE_DB_PATH.c_str());
+        if (std::filesystem::exists(TMP_DB_NAME))
+            std::remove(TMP_DB_NAME.c_str());
     }
 };
 
