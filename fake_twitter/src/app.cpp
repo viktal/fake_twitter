@@ -26,7 +26,6 @@ int main(int argc, char *argv[]) {
 //    config->dbname = "twitdb";
 //    config->debug = true;
 
-
     sql::connection_config config;
     config.host = "127.0.0.1";
     config.user = "twituser";
