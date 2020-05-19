@@ -7,7 +7,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04]
+        os: [ubuntu-20.04]
     steps:
       - name: Checkout
         uses: actions/checkout@v2.0.0
@@ -17,11 +17,11 @@ jobs:
           git submodule update --init --recursive
           git-lfs pull
       - name: Install CMake
-        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev postgresql-server-dev-11
+        run:  sudo apt-get update && sudo apt-get install -y cmake g++-9 valgrind lcov libsqlite3-dev postgresql-server-dev-12
       - name: Create db
         uses: harmon758/postgresql-action@v1
         with:
-          postgresql version: '11'
+          postgresql version: '12'
           postgresql user: 'twituser'
           postgresql password: '123'
           postgresql db: 'twitdb'
