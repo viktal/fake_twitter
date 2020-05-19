@@ -1,7 +1,8 @@
 #include <pistache/http.h>
 #include <pistache/router.h>
 #include <pistache/endpoint.h>
-#include <sqlpp11/sqlite3/sqlite3.h>
+//#include <sqlpp11/sqlite3/sqlite3.h>
+#include <sqlpp11/postgresql/connection.h>
 #include <rapidjson/rapidjson.h>
 
 #include "fake_twitter/serializer/json.h"
@@ -35,7 +36,8 @@ public:
 //        db = std::make_unique<sql::connection>(config);
 
         auto connection = std::make_unique<sqlpp::sqlite3::connection>(config);
-        auto connectionsPool = std::make_shared<repository::DBConnectionsPool>(std::move(connection));
+        auto connectionsPool = std::make_shared<repository::DBConnectionsPool
+                                <sqlpp::postgresql::connection>>(std::move(connection));
 
         commentsRepository = std::make_unique<repository::CommentsRepository>(connectionsPool);
         commentsEndpoint = std::make_shared<CommentsEndpoint>(commentsRepository);

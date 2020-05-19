@@ -1,5 +1,5 @@
 #include <sqlpp11/custom_query.h>
-#include <sqlpp11/sqlite3/sqlite3.h>
+#include <sqlpp11/postgresql/connection.h>
 #include <sqlpp11/sqlpp11.h>
 
 #include "fake_twitter/sqlpp_models/CommentsTab.h"

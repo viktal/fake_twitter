@@ -14,6 +14,7 @@ namespace fake_twitter::endpoints {
         void show (const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
         void drop (const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
         void create (const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
+        void showAll(const Pistache::Http::Request &request, Pistache::Http::ResponseWriter response);
     private:
         std::shared_ptr<repository::TweetsRepository> tweetsRepository;
     };
