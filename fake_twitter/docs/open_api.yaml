@@ -1,50 +1,129 @@
 openapi: 3.0.1
 info:
-  version: 1.0.0
+  version: 0.0.0
   title: "fake_twitter"
 
 paths:
-  #  0.0/users/show:
-  #    get:
-  #  0.0/users/create:
-  #    post:
-  #  0.0/users/update:
-  #    update:
-  #  0.0/users/drop:
-  #    delete:
-  /0.0/tweets/show:
-    parameters:
-      - name: id
-        in: query
-        schema:
-          type: string
+  /0.0/users/show:
     get:
-      summary: "Show new tweet by id"
+      tags:
+        - User
+      summary: Returns by id User
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       responses:
         200:
-          description: "Get tweet"
+          description: Ok, get user
           content:
             application/json:
               schema:
-                properties:
-                  id:
-                    type: integer
-                  body:
-                    type: string
-                  author:
-                    type: integer
-                  create_date:
-                    type: string
-                  rating:
-                    type: integer
-                  retweets:
-                    type: integer
+                $ref: '#/components/schemas/User'
         400:
-          description: "No id parameter"
+          description: >
+            No id parameter
+            No user with this id
+
+
+  /0.0/users/create:
+    post:
+      tags:
+        - User
+      summary: Create new user
+      parameters:
+        - name: username
+          in: query
+          schema:
+            type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: User created
+        400:
+          description: Not found one or more parameters
+
+  /0.0/users/update:
+    put:
+      tags:
+        - User
+      summary: Update user's name
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int64
+        - name: name
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: User updated
+        400:
+          description: No id parametr
+
+  /0.0/users/drop:
+    delete:
+      tags:
+        - User
+      summary: Delete user by id
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        200:
+          description: User deleted
+        400:
+          description: No id parameter
+
+  /0.0/tweets/show:
+    get:
+      tags:
+        - Tweet
+      summary: Returns by id Tweet
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        200:
+          description: Ok, get tweet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tweet'
+        400:
+          description: >
+            No id parameter
+            No tweet with this id
 
   /0.0/tweets/create:
     post:
-      summary: "Create new tweet"
+      tags:
+        - Tweet
+      summary: Create new tweet
+      parameters:
+        - name: author
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
       requestBody:
         content:
           application/json:
@@ -54,14 +133,29 @@ paths:
                   type: string
       responses:
         200:
-          description: "tweet created"
+          description: Tweet created
         400:
-          description: "Not found one or more parameters"
+          description: Not found one or more parameters
 
 
-#  0.0/tweets/drop:
-#    delete:
-#
+  /0.0/tweets/drop:
+    delete:
+      tags:
+        - Tweet
+      summary: Delete tweet by id
+      parameters:
+        - name: id
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        200:
+          description: Tweet deleted
+        400:
+          description: No id parameter
+
 #
 #  0.0/newsfeed/show:
 #
@@ -82,3 +176,51 @@ paths:
 #  0.0/tweets/like:
 #
 #  0.0/tweets/unlike:
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        username:
+          type: string
+        password_hash:
+          type: integer
+          format: int64
+        avatar:
+          type: string
+        followers_count:
+          type: integer
+          format: int32
+          default: 0
+        friends_count:
+          type: integer
+          format: int32
+          default: 0
+    Tweet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        body:
+          type: string
+        author:
+          type: integer
+          format: int64
+        create_date:
+          type: string
+          format: date-time
+        rating:
+          type: integer
+          format: int32
+          default: 0
+        retweets:
+          type: integer
+          format: int32
+          default: 0
