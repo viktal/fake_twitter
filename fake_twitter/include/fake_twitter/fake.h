@@ -155,6 +155,30 @@ model::User object() {
 
 }  // namespace user
 
+namespace tweet {
+    static auto rnd = std::mt19937(123);
+
+std::string body() {
+    std::string body;
+    static std::string alphanum =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    static std::uniform_int_distribution<int> bodySizeSampler(5, 250);
+    auto num = bodySizeSampler(rnd);
+    for (int i = 0; i < num; i++) {
+        static std::uniform_int_distribution<int> alphanumIndSampler(
+            0, alphanum.size() - 1);
+        body += alphanum[alphanumIndSampler(rnd)];
+    }
+    model::Tweet object() {
+    // TODO придумать, что делать с ID
+    return model::Tweet{0, body(), 0};
+}
+}
+
+} // namespace tweet
+
 void postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(
         "CREATE TABLE Users (\n"
