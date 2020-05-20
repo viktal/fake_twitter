@@ -10,6 +10,7 @@
 
 #include "fake_twitter/common.h"
 #include "fake_twitter/model/User.h"
+#include "fake_twitter/model/Tweet.h"
 
 namespace fake_twitter::fake {
 namespace user {
@@ -142,9 +143,7 @@ std::string username() {
 }
 
 PasswordHash hash() {
-    static std::uniform_int_distribution<PasswordHash> hashSampler(
-        std::numeric_limits<PasswordHash>::min(),
-        std::numeric_limits<PasswordHash>::max());
+    static std::uniform_int_distribution<PasswordHash> hashSampler(0,100000);
     return hashSampler(rnd);
 }
 
@@ -154,6 +153,33 @@ model::User object() {
 }
 
 }  // namespace user
+
+    namespace tweet {
+        static auto rnd = std::mt19937(123);
+
+        std::string body() {
+            std::string body;
+            static std::string alphanum =
+                    "0123456789"
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                    "abcdefghijklmnopqrstuvwxyz";
+            static std::uniform_int_distribution<int> bodySizeSampler(5, 250);
+            auto num = bodySizeSampler(rnd);
+            for (int i = 0; i < num; i++) {
+                static std::uniform_int_distribution<int> alphanumIndSampler(
+                        0, alphanum.size() - 1);
+                body += alphanum[alphanumIndSampler(rnd)];
+            }
+            return body;
+        }
+        model::Tweet object(int userCount) {
+            static std::uniform_int_distribution<int> bodySizeSampler(1, userCount);
+            int num = bodySizeSampler(rnd);
+            return model::Tweet{0, body(), num};
+        }
+
+    } // namespace tweet
+
 
 void postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(
@@ -200,11 +226,11 @@ void postgresql_tables(sqlpp::postgresql::connection& db) {
         "\n"
         "\n"
         "\n"
-        "CREATE TABLE UserFollower (\n"
+        "CREATE TABLE Follower (\n"
         "        \"id\" serial NOT NULL,\n"
-        "        \"UserID\" integer NOT NULL,\n"
-        "        \"FollowsOn\" integer NOT NULL,\n"
-        "        CONSTRAINT \"UserFollower_pk\" PRIMARY KEY (\"id\")\n"
+        "        \"author\" integer NOT NULL,\n"
+        "        \"addresser\" integer NOT NULL,\n"
+        "        CONSTRAINT \"Follower_pk\" PRIMARY KEY (\"id\")\n"
         ") WITH (\n"
         "  OIDS=FALSE\n"
         ");\n"
@@ -252,10 +278,10 @@ void postgresql_tables(sqlpp::postgresql::connection& db) {
         "ALTER TABLE Comments ADD CONSTRAINT \"Comments_fk1\" FOREIGN KEY "
         "(\"comment_for\") REFERENCES Tweets(\"id\");\n"
         "\n"
-        "ALTER TABLE UserFollower ADD CONSTRAINT \"UserFollower_fk0\" FOREIGN "
-        "KEY (\"UserID\") REFERENCES Users(\"id\");\n"
-        "ALTER TABLE UserFollower ADD CONSTRAINT \"UserFollower_fk1\" FOREIGN "
-        "KEY (\"FollowsOn\") REFERENCES Users(\"id\");\n"
+        "ALTER TABLE Follower ADD CONSTRAINT \"Follower_fk0\" FOREIGN "
+        "KEY (\"author\") REFERENCES Users(\"id\");\n"
+        "ALTER TABLE Follower ADD CONSTRAINT \"Follower_fk1\" FOREIGN "
+        "KEY (\"addresser\") REFERENCES Users(\"id\");\n"
         "\n"
         "\n"
         "ALTER TABLE TagTweet ADD CONSTRAINT \"TagTweet_fk0\" FOREIGN KEY "
