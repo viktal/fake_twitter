@@ -9,6 +9,7 @@
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"
 #include "fake_twitter/sqlpp_models/LikeTab.h"
+#include "fake_twitter/sqlpp_models/TwagsTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
 
 namespace fake_twitter::repository {
@@ -25,10 +26,12 @@ public:
     bool like(PKey author, PKey twit);
     bool unlike(PKey author, PKey twit);
 
+
 private:
     std::shared_ptr<DBConnectionsPool> pool;
     fake_twitter::sqlpp_models::TabTweets tabTweets;
     fake_twitter::sqlpp_models::TabLikes tabLikes;
+    fake_twitter::sqlpp_models::TabTwags tabTwags;
 };
 
 }  // end namespace fake_twitter::repository
