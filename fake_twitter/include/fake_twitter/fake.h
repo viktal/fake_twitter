@@ -182,16 +182,9 @@ model::User object() {
 
 
 
-    
+
 void postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(
-            "DROP TABLE Users CASCADE;\n"
-            "DROP TABLE Tweets CASCADE;\n"
-            "DROP TABLE Comments CASCADE;\n"
-            "DROP TABLE Tag CASCADE;\n"
-            "DROP TABLE Follower;\n"
-            "DROP TABLE TagTweet CASCADE;\n"
-            "DROP TABLE LikeTweet CASCADE;\n"
         "CREATE TABLE Users (\n"
         "        \"id\" serial NOT NULL,\n"
         "        \"name\" varchar(255) NOT NULL,\n"
