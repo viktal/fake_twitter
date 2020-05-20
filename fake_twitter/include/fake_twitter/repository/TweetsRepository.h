@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sqlpp11/postgresql/postgresql.h>
 #include <sqlpp11/sqlpp11.h>
 
 #include <memory>

@@ -30,13 +30,13 @@ bool TweetsRepository::drop(PKey id) {
 
 model::Tweet TweetsRepository::create(const PKey& author,
                                       const std::string& body) {
-    auto newid = pool->run(insert_into(tabTweets).set(
+    auto newid = pool->run(sqlpp::postgresql::insert_into(tabTweets).set(
         tabTweets.author = author, tabTweets.body = body,
         tabTweets.create_date = std::chrono::system_clock::now(),
-        tabTweets.retweets = 0, tabTweets.rating = 0));
+        tabTweets.retweets = 0, tabTweets.rating = 0).returning(tabTweets.id));
 
     return std::move(
-        model::Tweet{PKey(newid), body, PKey(author), "12.12.12", 0, 0});
+        model::Tweet{PKey(newid.front().id.value()), body, PKey(author), "12.12.12", 0, 0});
 }
 
 bool TweetsRepository::like(PKey author, PKey twit) {
