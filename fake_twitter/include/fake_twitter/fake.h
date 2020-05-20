@@ -171,6 +171,8 @@ std::string body() {
             0, alphanum.size() - 1);
         body += alphanum[alphanumIndSampler(rnd)];
     }
+    return body;
+}
     model::Tweet object() {
     // TODO придумать, что делать с ID
     return model::Tweet{0, body(), 0};
