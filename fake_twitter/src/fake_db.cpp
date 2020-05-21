@@ -35,8 +35,37 @@ int main() {
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
     fake_twitter::fake::postgresql_tables(db);
 
+    int userCount = 10;
+    int tweetCount = 10;
+
     TabUsers tabUsers;
-    db(insert_into(tabUsers).set(
+    for(int i = 0; i < userCount; i++) {
+        auto user = fake_twitter::fake::user::object();
+        db(insert_into(tabUsers).set(
+                tabUsers.name = user.name, tabUsers.username = user.username,
+                tabUsers.password_hash = user.password_hash, tabUsers.friends_count = 0,
+                tabUsers.followers_count = 0, tabUsers.avatar = "path"));
+    }
+
+    TabTweets tabTweets;
+    for(int i = 0; i < tweetCount; i++) {
+        auto tweet = fake_twitter::fake::tweet::object(userCount);
+        db(insert_into(tabTweets).set(
+                tabTweets.body = tweet.body,
+                tabTweets.create_date = std::chrono::system_clock::now(),
+                tabTweets.author = tweet.author, tabTweets.retweets = 0, tabTweets.rating = 0));
+    }
+
+    TabFollower tabFollower;
+    for(int i = 1; i <= userCount - 1; i++) {
+        for(int j = i + 1; j <= userCount; j++) {
+            db(insert_into(tabFollower).set(
+                    tabFollower.author = i,
+                    tabFollower.addresser = j));
+        }
+    }
+
+    /*db(insert_into(tabUsers).set(
         tabUsers.name = "twitter", tabUsers.username = "twitter",
         tabUsers.password_hash = 123, tabUsers.friends_count = 0,
         tabUsers.followers_count = 0, tabUsers.avatar = "path"));
@@ -79,12 +108,12 @@ int main() {
     };
 
     TabFollower tabFollower;
-    //    db(insert_into(tabFollower).set(
-    //            tabFollower.author = 1,
-    //            tabFollower.addresser = 2));
+        db(insert_into(tabFollower).set(
+                tabFollower.author = 1,
+               tabFollower.addresser = 2));
 
     TabLikes tabLike;
-    //    db(insert_into(tabLike).set(
-    //            tabLike.author = 1,
-    //            tabLike.twit = 2));
+        db(insert_into(tabLike).set(
+                tabLike.author = 1,
+                tabLike.twit = 2));*/
 }

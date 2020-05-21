@@ -19,9 +19,6 @@ std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
                 .where(tabTweets.author == firstFollower.addresser.value());
 
         auto resultTweet = pool->run(queryTweet);
-        if (resultTweet.empty()) {
-            return tweet_vector;
-        }
         while (!resultTweet.empty()) {
             auto& firstTweet = resultTweet.front();
             model::Tweet t = {firstTweet.id.value(), firstTweet.body.value(),
