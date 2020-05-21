@@ -14,4 +14,6 @@ struct Tweet {
     size_t retweets = 0;
 };
 
+bool operator==(const Tweet& t1, const Tweet& t2);
+
 }  // namespace fake_twitter::model
