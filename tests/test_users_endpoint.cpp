@@ -91,8 +91,8 @@ TEST_F(UsersEndpointTest, Update) {
     name.reset();
     avatar.reset();
     EXPECT_CALL(*repository, update(1, name, avatar)).Times(1);
-    response = client->Put("/update?id=1", "",
-                                "application/x-www-form-urlencoded");
+    response =
+        client->Put("/update?id=1", "", "application/x-www-form-urlencoded");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
 }
 
