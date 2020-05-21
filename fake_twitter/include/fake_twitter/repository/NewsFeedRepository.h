@@ -21,6 +21,7 @@ public:
     virtual ~NewsFeedRepository() = default;
 
     virtual std::vector<model::Tweet> get(PKey id);
+    virtual std::vector<model::Tweet> getUserBoard(PKey id);
 
 private:
     std::shared_ptr<DBConnectionsPool> pool;
