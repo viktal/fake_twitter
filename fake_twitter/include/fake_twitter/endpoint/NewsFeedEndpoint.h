@@ -13,6 +13,8 @@ public:
 
     void show(const Pistache::Http::Request& request,
               Pistache::Http::ResponseWriter response);
+    void showUserBoard(const Pistache::Http::Request& request,
+                       Pistache::Http::ResponseWriter response);
 
 private:
     std::shared_ptr<repository::NewsFeedRepository> newsFeedRepository;

@@ -19,6 +19,9 @@ void RestServer::setupRoutes() {
     Get(router, "/0.0/newsfeed/show",
         Routes::bind(&endpoints::NewsFeedEndpoint::show, newsFeedEndpoint));
 
+    Get(router, "/0.0/userboard/show",
+        Routes::bind(&endpoints::NewsFeedEndpoint::showUserBoard, newsFeedEndpoint));
+
     Post(router, "/0.0/users/follow",
          Routes::bind(&endpoints::UsersEndpoint::follow, usersEndpoint));
     Delete(router, "/0.0/users/unfollow",
