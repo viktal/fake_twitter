@@ -63,7 +63,7 @@ void UsersEndpoint::update(const Pistache::Rest::Request& request,
         avatar = std::optional<std::string>(avatar_optional.get());
 
     usersRepository->update(id, name, avatar);
-    response.send(Pistache::Http::Code::Ok);
+    response.send(Pistache::Http::Code::Ok, "User updated");
 }
 
 void UsersEndpoint::drop(const Pistache::Rest::Request& request,
@@ -75,9 +75,9 @@ void UsersEndpoint::drop(const Pistache::Rest::Request& request,
     }
     auto id = std::stol(id_optional.get());
     if (usersRepository->drop(id))
-        response.send(Pistache::Http::Code::Ok);
+        response.send(Pistache::Http::Code::Ok, "User deleted");
     else
-        response.send(Pistache::Http::Code::Bad_Request);
+        response.send(Pistache::Http::Code::Bad_Request, "Cannot delete user");
 }
 
 void UsersEndpoint::showFollowTable(const Pistache::Rest::Request& request,
