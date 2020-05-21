@@ -39,29 +39,30 @@ int main() {
     int tweetCount = 10;
 
     TabUsers tabUsers;
-    for(int i = 0; i < userCount; i++) {
+    for (int i = 0; i < userCount; i++) {
         auto user = fake_twitter::fake::user::object();
         db(insert_into(tabUsers).set(
-                tabUsers.name = user.name, tabUsers.username = user.username,
-                tabUsers.password_hash = user.password_hash, tabUsers.friends_count = 0,
-                tabUsers.followers_count = 0, tabUsers.avatar = "path"));
+            tabUsers.name = user.name, tabUsers.username = user.username,
+            tabUsers.password_hash = user.password_hash,
+            tabUsers.friends_count = 0, tabUsers.followers_count = 0,
+            tabUsers.avatar = "path"));
     }
 
     TabTweets tabTweets;
-    for(int i = 0; i < tweetCount; i++) {
+    for (int i = 0; i < tweetCount; i++) {
         auto tweet = fake_twitter::fake::tweet::object(userCount);
         db(insert_into(tabTweets).set(
-                tabTweets.body = tweet.body,
-                tabTweets.create_date = std::chrono::system_clock::now(),
-                tabTweets.author = tweet.author, tabTweets.retweets = 0, tabTweets.rating = 0));
+            tabTweets.body = tweet.body,
+            tabTweets.create_date = std::chrono::system_clock::now(),
+            tabTweets.author = tweet.author, tabTweets.retweets = 0,
+            tabTweets.rating = 0));
     }
 
     TabFollower tabFollower;
-    for(int i = 1; i <= userCount - 1; i++) {
-        for(int j = i + 1; j <= userCount; j++) {
-            db(insert_into(tabFollower).set(
-                    tabFollower.author = i,
-                    tabFollower.addresser = j));
+    for (int i = 1; i <= userCount - 1; i++) {
+        for (int j = i + 1; j <= userCount; j++) {
+            db(insert_into(tabFollower)
+                   .set(tabFollower.author = i, tabFollower.addresser = j));
         }
     }
 

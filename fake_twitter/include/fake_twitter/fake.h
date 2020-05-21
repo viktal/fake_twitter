@@ -9,8 +9,8 @@
 //#include <sqlpp11/sqlite3/sqlite3.h>
 
 #include "fake_twitter/common.h"
-#include "fake_twitter/model/User.h"
 #include "fake_twitter/model/Tweet.h"
+#include "fake_twitter/model/User.h"
 
 namespace fake_twitter::fake {
 namespace user {
@@ -143,7 +143,7 @@ std::string username() {
 }
 
 PasswordHash hash() {
-    static std::uniform_int_distribution<PasswordHash> hashSampler(0,100000);
+    static std::uniform_int_distribution<PasswordHash> hashSampler(0, 100000);
     return hashSampler(rnd);
 }
 
@@ -154,34 +154,31 @@ model::User object() {
 
 }  // namespace user
 
-    namespace tweet {
-        static auto rnd = std::mt19937(123);
+namespace tweet {
+static auto rnd = std::mt19937(123);
 
-        std::string body() {
-            std::string body;
-            static std::string alphanum =
-                    "0123456789"
-                    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                    "abcdefghijklmnopqrstuvwxyz";
-            static std::uniform_int_distribution<int> bodySizeSampler(5, 250);
-            auto num = bodySizeSampler(rnd);
-            for (int i = 0; i < num; i++) {
-                static std::uniform_int_distribution<int> alphanumIndSampler(
-                        0, alphanum.size() - 1);
-                body += alphanum[alphanumIndSampler(rnd)];
-            }
-            return body;
-        }
-        model::Tweet object(int userCount) {
-            static std::uniform_int_distribution<int> bodySizeSampler(1, userCount);
-            int num = bodySizeSampler(rnd);
-            return model::Tweet{0, body(), num};
-        }
+std::string body() {
+    std::string body;
+    static std::string alphanum =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+    static std::uniform_int_distribution<int> bodySizeSampler(5, 250);
+    auto num = bodySizeSampler(rnd);
+    for (int i = 0; i < num; i++) {
+        static std::uniform_int_distribution<int> alphanumIndSampler(
+            0, alphanum.size() - 1);
+        body += alphanum[alphanumIndSampler(rnd)];
+    }
+    return body;
+}
+model::Tweet object(int userCount) {
+    static std::uniform_int_distribution<int> bodySizeSampler(1, userCount);
+    int num = bodySizeSampler(rnd);
+    return model::Tweet{0, body(), num};
+}
 
-    } // namespace tweet
-
-
-
+}  // namespace tweet
 
 void postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(

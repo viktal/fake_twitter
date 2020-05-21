@@ -69,12 +69,44 @@ TEST_F(UsersEndpointTest, Create) {
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
 }
 
-// TEST_F(UsersEndpointTest, Update) {
-//    Rest::Routes::Post(
-//        router, "/update",
-//        Rest::Routes::bind(&UsersEndpoint::update, usersEndpoint));
-//    serveThreaded();
-//
-//    model::User user = {0, "name", "username", 123};
-////    EXPECT_CALL(*repository, update(1, "", "")).WillOnce());
-//}
+TEST_F(UsersEndpointTest, Update) {
+    Rest::Routes::Put(
+        router, "/update",
+        Rest::Routes::bind(&UsersEndpoint::update, usersEndpoint));
+    serveThreaded();
+    std::optional<std::string> name = "name";
+    std::optional<std::string> avatar = "path";
+
+    EXPECT_CALL(*repository, update(1, name, avatar)).Times(1);
+
+    auto response = client->Put("/update?id=1&name=name&avatar=path", "",
+                                "application/x-www-form-urlencoded");
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
+
+    EXPECT_CALL(*repository, update(1, name, avatar)).Times(0);
+    response = client->Put("/update?name=name&avatar=path", "",
+                           "application/x-www-form-urlencoded");
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
+
+    name.reset();
+    avatar.reset();
+    EXPECT_CALL(*repository, update(1, name, avatar)).Times(1);
+    response =
+        client->Put("/update?id=1", "", "application/x-www-form-urlencoded");
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
+}
+
+TEST_F(UsersEndpointTest, Drop) {
+    Rest::Routes::Delete(
+        router, "/drop",
+        Rest::Routes::bind(&UsersEndpoint::drop, usersEndpoint));
+    serveThreaded();
+
+    EXPECT_CALL(*repository, drop(1)).WillOnce(Return(true));
+    auto response = client->Delete("/drop?id=1");
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
+
+    EXPECT_CALL(*repository, drop(1)).WillOnce(Return(false));
+    response = client->Delete("/drop?id=1");
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
+}
