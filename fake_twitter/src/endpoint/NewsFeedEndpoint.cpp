@@ -29,7 +29,7 @@ NewsFeedEndpoint::NewsFeedEndpoint(
 };
 
 void NewsFeedEndpoint::showUserBoard(const Pistache::Http::Request& request,
-                            Pistache::Http::ResponseWriter response) {
+                                     Pistache::Http::ResponseWriter response) {
     using fake_twitter::sqlpp_models::TabTweets;
     auto id_optional = request.query().get("id");
     if (id_optional.isEmpty()) {
@@ -37,14 +37,15 @@ void NewsFeedEndpoint::showUserBoard(const Pistache::Http::Request& request,
         return;
     }
     auto id = std::stol(id_optional.get());
-    std::vector<model::Tweet> tweetVector = newsFeedRepository->getUserBoard(id);
+    std::vector<model::Tweet> tweetVector =
+        newsFeedRepository->getUserBoard(id);
     if (tweetVector.empty()) {
         response.send(Pistache::Http::Code::Bad_Request,
                       "You have no tweets yet ");
         return;
     }
     response.headers().add<Pistache::Http::Header::ContentType>(
-            MIME(Application, Json));
+        MIME(Application, Json));
     response.send(Pistache::Http::Code::Ok,
                   serialization::to_json(tweetVector));
 }

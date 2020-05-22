@@ -10,6 +10,7 @@ set(SOURCES
         src/endpoint/CommentsEndpoint.cpp
         src/endpoint/NewsFeedEndpoint.cpp
         src/model/User.cpp
+        src/model/Tweet.cpp
         src/RestServer.cpp
         )
 

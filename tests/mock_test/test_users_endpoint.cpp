@@ -15,11 +15,12 @@ class UsersEndpointTest : public EndpointTest {
 protected:
     void SetUp() override {
         EndpointTest::SetUp();
-        repository = std::make_shared<MockUsersRepository>();
+        mockUsersRepository = std::make_shared<MockUsersRepository>();
         usersEndpoint = std::make_shared<endpoints::UsersEndpoint>(
-            std::static_pointer_cast<repository::UsersRepository>(repository));
+            std::static_pointer_cast<repository::UsersRepository>(
+                mockUsersRepository));
     }
-    std::shared_ptr<MockUsersRepository> repository;
+    std::shared_ptr<MockUsersRepository> mockUsersRepository;
     std::shared_ptr<UsersEndpoint> usersEndpoint;
 };
 
@@ -32,14 +33,16 @@ TEST_F(UsersEndpointTest, Get) {
     // Invalid user ID
     // Note: Unique ptr is a move-only object, to avoid headache with gmock and
     // compiler, it is better to use lambda here
-    EXPECT_CALL(*repository, get(1)).WillOnce([]() { return nullptr; });
+    EXPECT_CALL(*mockUsersRepository, get(1)).WillOnce([]() {
+        return nullptr;
+    });
 
     auto response = client->Get("/show?id=1");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
 
     // Valid user ID
     auto user = fake::user::object();
-    EXPECT_CALL(*repository, get(123)).WillOnce([&]() {
+    EXPECT_CALL(*mockUsersRepository, get(123)).WillOnce([&]() {
         return std::make_unique<model::User>(user);
     });
 
@@ -57,7 +60,8 @@ TEST_F(UsersEndpointTest, Create) {
     serveThreaded();
 
     model::User user = {0, "name", "username", 123};
-    EXPECT_CALL(*repository, create("name", "username")).WillOnce(Return(user));
+    EXPECT_CALL(*mockUsersRepository, create("name", "username"))
+        .WillOnce(Return(user));
 
     auto response = client->Post("/create?name=name&username=username", {});
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
@@ -77,20 +81,20 @@ TEST_F(UsersEndpointTest, Update) {
     std::optional<std::string> name = "name";
     std::optional<std::string> avatar = "path";
 
-    EXPECT_CALL(*repository, update(1, name, avatar)).Times(1);
+    EXPECT_CALL(*mockUsersRepository, update(1, name, avatar)).Times(1);
 
     auto response = client->Put("/update?id=1&name=name&avatar=path", "",
                                 "application/x-www-form-urlencoded");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
 
-    EXPECT_CALL(*repository, update(1, name, avatar)).Times(0);
+    EXPECT_CALL(*mockUsersRepository, update(1, name, avatar)).Times(0);
     response = client->Put("/update?name=name&avatar=path", "",
                            "application/x-www-form-urlencoded");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
 
     name.reset();
     avatar.reset();
-    EXPECT_CALL(*repository, update(1, name, avatar)).Times(1);
+    EXPECT_CALL(*mockUsersRepository, update(1, name, avatar)).Times(1);
     response =
         client->Put("/update?id=1", "", "application/x-www-form-urlencoded");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
@@ -102,11 +106,11 @@ TEST_F(UsersEndpointTest, Drop) {
         Rest::Routes::bind(&UsersEndpoint::drop, usersEndpoint));
     serveThreaded();
 
-    EXPECT_CALL(*repository, drop(1)).WillOnce(Return(true));
+    EXPECT_CALL(*mockUsersRepository, drop(1)).WillOnce(Return(true));
     auto response = client->Delete("/drop?id=1");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
 
-    EXPECT_CALL(*repository, drop(1)).WillOnce(Return(false));
+    EXPECT_CALL(*mockUsersRepository, drop(1)).WillOnce(Return(false));
     response = client->Delete("/drop?id=1");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
 }

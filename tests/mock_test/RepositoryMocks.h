@@ -2,6 +2,7 @@
 
 #include <gmock/gmock.h>
 
+#include "fake_twitter/repository/TweetsRepository.h"
 #include "fake_twitter/repository/UsersRepository.h"
 
 class MockUsersRepository : public fake_twitter::repository::UsersRepository {
@@ -25,5 +26,24 @@ public:
                 (override));
     MOCK_METHOD(bool, unfollow,
                 (fake_twitter::PKey author, fake_twitter::PKey addresser),
+                (override));
+};
+
+class MockTweetsRepository : public fake_twitter::repository::TweetsRepository {
+public:
+    MockTweetsRepository()
+        : fake_twitter::repository::TweetsRepository(nullptr) {}
+
+    MOCK_METHOD(std::unique_ptr<fake_twitter::model::Tweet>, get,
+                (fake_twitter::PKey id), (override));
+    MOCK_METHOD(fake_twitter::model::Tweet, create,
+                (const fake_twitter::PKey& author, const std::string& body),
+                (override));
+    MOCK_METHOD(bool, drop, (fake_twitter::PKey id), (override));
+    MOCK_METHOD(bool, like,
+                (fake_twitter::PKey author, fake_twitter::PKey twit),
+                (override));
+    MOCK_METHOD(bool, unlike,
+                (fake_twitter::PKey author, fake_twitter::PKey twit),
                 (override));
 };

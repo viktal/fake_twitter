@@ -23,8 +23,8 @@ public:
     virtual model::Tweet create(const PKey& author, const std::string& body);
     virtual bool drop(PKey id);
 
-    bool like(PKey author, PKey twit);
-    bool unlike(PKey author, PKey twit);
+    virtual bool like(PKey author, PKey twit);
+    virtual bool unlike(PKey author, PKey twit);
 
 private:
     std::shared_ptr<DBConnectionsPool> pool;
