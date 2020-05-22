@@ -30,7 +30,7 @@ public:
         Port port(PORT);
         Address addr(ADDRESS, port);
 
-        auto opts = Http::Endpoint::options().threads(4).flags(
+        auto opts = Http::Endpoint::options().threads(1).flags(
             Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
 
         server = std::make_unique<RestServer>(addr, config);
