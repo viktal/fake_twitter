@@ -59,6 +59,7 @@ int main() {
             tabTweets.rating = 0));
     }
 
+
     TabFollower tabFollower;
     for (int i = 0; i <= userCount*userCount; i++) {
         static std::uniform_int_distribution<int> userSizeSampler(1, userCount);
@@ -70,6 +71,7 @@ int main() {
             //fake_twitter::repository::UsersRepository::follow(num1, num2);
         }
     }
+
 
     /*db(insert_into(tabUsers).set(
         tabUsers.name = "twitter", tabUsers.username = "twitter",
