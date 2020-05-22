@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "fake_twitter/fake.h"
+#include "fake_twitter/sqlpp_models/TagTweetTab.h"
 #include "fake_twitter/sqlpp_models/TagsTab.h"
 #include "fake_twitter/sqlpp_models/CommentsTab.h"
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
@@ -13,6 +14,7 @@
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 
 namespace sql = sqlpp::postgresql;
+using fake_twitter::sqlpp_models::TabTagTweet;
 using fake_twitter::sqlpp_models::TabTags;
 using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabFollower;
@@ -88,6 +90,10 @@ int main() {
     TabTags tabTags;
     db(insert_into(tabTags)
             .set(tabTags.title = "dota"));
+
+    TabTagTweet tabTagTweet;
+    db(insert_into(tabTagTweet)
+            .set(tabTagTweet.tweetID = 2, tabTagTweet.tagID = 1));
 
 
     /*db(insert_into(tabUsers).set(

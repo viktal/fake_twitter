@@ -8,6 +8,7 @@
 
 #include <vector>
 
+#include "fake_twitter/model/TagTweet.h"
 #include "fake_twitter/model/Tag.h"
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/model/Followers.h"
@@ -28,4 +29,5 @@ std::string to_json(model::Followers followers);
 std::string to_json(model::Comment comment);
 std::string to_json(model::Comment* comment, int number);
 std::string to_json(model::Tag tag);
+std::string to_json(model::TagTweet tagtweet);
 }  // namespace fake_twitter::serialization
