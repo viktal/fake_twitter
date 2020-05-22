@@ -58,13 +58,13 @@ int main() {
             tabTweets.rating = 0));
     }
 
-    TabFollower tabFollower;
-    for (int i = 1; i <= userCount - 1; i++) {
-        for (int j = i + 1; j <= userCount; j++) {
-            db(insert_into(tabFollower)
-                   .set(tabFollower.author = i, tabFollower.addresser = j));
-        }
-    }
+//    TabFollower tabFollower;
+//    for (int i = 1; i <= userCount - 1; i++) {
+//        for (int j = i + 1; j <= userCount; j++) {
+//            db(insert_into(tabFollower)
+//                   .set(tabFollower.author = i, tabFollower.addresser = j));
+//        }
+//    }
 
     /*db(insert_into(tabUsers).set(
         tabUsers.name = "twitter", tabUsers.username = "twitter",
