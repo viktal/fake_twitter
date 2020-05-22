@@ -42,6 +42,11 @@ model::User UsersRepository::create(const std::string& name,
 }
 
 bool UsersRepository::drop(PKey id) {
+    auto result = pool->run(
+            select(tabFollower.addresser)
+                    .from(tabFollower)
+                    .where(tabFollower.author == id ));
+    std::cout << "gg" << result.size();
     return pool->run(remove_from(tabUsers).where(tabUsers.id == id));
 }
 
