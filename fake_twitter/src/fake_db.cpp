@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "fake_twitter/fake.h"
+#include "fake_twitter/sqlpp_models/TagsTab.h"
 #include "fake_twitter/sqlpp_models/CommentsTab.h"
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
 #include "fake_twitter/sqlpp_models/LikeTab.h"
@@ -12,6 +13,7 @@
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 
 namespace sql = sqlpp::postgresql;
+using fake_twitter::sqlpp_models::TabTags;
 using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabFollower;
 using fake_twitter::sqlpp_models::TabLikes;
@@ -38,6 +40,7 @@ int main() {
     static auto rnd = std::mt19937(123);
     int userCount = 10;
     int tweetCount = 10;
+    int commentCount = 10;
 
     TabUsers tabUsers;
     for (int i = 0; i < userCount; i++) {
@@ -71,6 +74,20 @@ int main() {
             //fake_twitter::repository::UsersRepository::follow(num1, num2);
         }
     }
+
+    TabComments tabComments;
+    for (int i = 0; i < commentCount; i++) {
+        auto comment = fake_twitter::fake::comment::object(userCount, tweetCount);
+        db(insert_into(tabComments)
+            .set(tabComments.body = comment.body,
+                    tabComments.create_date = std::chrono::system_clock::now(),
+                    tabComments.author = comment.author, tabComments.comment_for = comment.comment_for,
+                    tabComments.rating = 0));
+    }
+
+    TabTags tabTags;
+    db(insert_into(tabTags)
+            .set(tabTags.title = "dota"));
 
 
     /*db(insert_into(tabUsers).set(
