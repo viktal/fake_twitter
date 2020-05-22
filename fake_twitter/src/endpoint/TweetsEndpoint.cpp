@@ -32,9 +32,9 @@ void TweetsEndpoint::drop(const Pistache::Http::Request& request,
     }
     auto id = std::stol(id_optional.get());
     if (tweetsRepository->drop(id))
-        response.send(Pistache::Http::Code::Ok);
+        response.send(Pistache::Http::Code::Ok, "Tweet deleted");
     else
-        response.send(Pistache::Http::Code::Bad_Request);
+        response.send(Pistache::Http::Code::Bad_Request, "Cannot delete tweet");
 }
 
 void TweetsEndpoint::create(const Pistache::Http::Request& request,

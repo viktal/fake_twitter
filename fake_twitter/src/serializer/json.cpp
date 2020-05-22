@@ -26,26 +26,13 @@ std::string serialization::to_json(model::User user) {
     return buffer.GetString();
 }
 
-template <>
-model::User serialization::from_json<model::User>(const std::string& json) {
-    Document document;
-    document.Parse(json.c_str());
-    return model::User{document["id"].Get<PKey>(),
-                       document["name"].GetString(),
-                       document["username"].GetString(),
-                       document["password_hash"].Get<PasswordHash>(),
-                       document["avatar"].GetString(),
-                       document["followers_count"].Get<size_t>(),
-                       document["friends_count"].Get<size_t>()};
-}
-
 std::string serialization::to_json(model::Tweet tweet) {
     Document d;
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
     d.AddMember("id", tweet.id, allocator);
-    d.AddMember("name", Value().SetString(StringRef(tweet.body.c_str())),
+    d.AddMember("body", Value().SetString(StringRef(tweet.body.c_str())),
                 allocator);
     d.AddMember("author", tweet.author, allocator);
     d.AddMember("create_date",
@@ -96,7 +83,7 @@ std::string serialization::to_json(model::Comment comment) {
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
     d.AddMember("id", comment.id, allocator);
-    d.AddMember("name", Value().SetString(StringRef(comment.body.c_str())),
+    d.AddMember("body", Value().SetString(StringRef(comment.body.c_str())),
                 allocator);
     d.AddMember("author", comment.author, allocator);
     d.AddMember("create_date",
@@ -116,7 +103,7 @@ std::string serialization::to_json(model::Comment* comment, int number) {
     Document d;
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
-    char table[6][32] = {"id",          "name",        "author",
+    char table[6][32] = {"id",          "body",        "author",
                          "create_date", "comment_for", "rating"};
     for (int i = 0; i <= number; i++) {
         for (int j = 0; j < 6; j++) {
@@ -146,4 +133,27 @@ std::string serialization::to_json(model::Comment* comment, int number) {
     d.Accept(writer);
 
     return buffer.GetString();
+}
+
+template <>
+model::User serialization::from_json<model::User>(const std::string& json) {
+    Document document;
+    document.Parse(json.c_str());
+    return model::User{document["id"].Get<PKey>(),
+                       document["name"].GetString(),
+                       document["username"].GetString(),
+                       document["password_hash"].Get<PasswordHash>(),
+                       document["avatar"].GetString(),
+                       document["followers_count"].Get<size_t>(),
+                       document["friends_count"].Get<size_t>()};
+}
+
+template <>
+model::Tweet serialization::from_json<model::Tweet>(const std::string& json) {
+    Document document;
+    document.Parse(json.c_str());
+    return model::Tweet{
+        document["id"].Get<PKey>(),       document["body"].GetString(),
+        document["author"].Get<PKey>(),   document["create_date"].GetString(),
+        document["rating"].Get<size_t>(), document["retweets"].Get<size_t>()};
 }
