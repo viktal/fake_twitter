@@ -35,6 +35,7 @@ int main() {
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
     fake_twitter::fake::postgresql_tables(db);
 
+    static auto rnd = std::mt19937(123);
     int userCount = 10;
     int tweetCount = 10;
 
@@ -58,13 +59,19 @@ int main() {
             tabTweets.rating = 0));
     }
 
-//    TabFollower tabFollower;
-//    for (int i = 1; i <= userCount - 1; i++) {
-//        for (int j = i + 1; j <= userCount; j++) {
-//            db(insert_into(tabFollower)
-//                   .set(tabFollower.author = i, tabFollower.addresser = j));
-//        }
-//    }
+
+    TabFollower tabFollower;
+    for (int i = 0; i <= userCount*userCount; i++) {
+        static std::uniform_int_distribution<int> userSizeSampler(1, userCount);
+        int num1 = userSizeSampler(rnd);
+        int num2 = userSizeSampler(rnd);
+        if (num1 != num2) {
+            db(insert_into(tabFollower)
+                    .set(tabFollower.author = num1, tabFollower.addresser = num2));
+            //fake_twitter::repository::UsersRepository::follow(num1, num2);
+        }
+    }
+
 
     /*db(insert_into(tabUsers).set(
         tabUsers.name = "twitter", tabUsers.username = "twitter",
