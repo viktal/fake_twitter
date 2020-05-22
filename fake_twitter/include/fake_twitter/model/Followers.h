@@ -4,10 +4,10 @@
 
 namespace fake_twitter::model {
 
-    struct Followers {
-        const PKey id;
-        PKey author;
-        PKey addresser;
-    };
+struct Followers {
+    const PKey id;
+    PKey author;
+    PKey addresser;
+};
 
-} // fake_twitter
+}  // namespace fake_twitter::model

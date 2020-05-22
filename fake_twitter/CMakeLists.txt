@@ -1,15 +1,28 @@
-add_library(fake_twitter INTERFACE)
-target_include_directories(fake_twitter INTERFACE include)
+set(SOURCES
+        src/serializer/json.cpp
+        src/repository/DBConnectionPool.cpp
+        src/repository/TweetsRepository.cpp
+        src/repository/UsersRepository.cpp
+        src/repository/CommentsRepository.cpp
+        src/repository/NewsFeedRepository.cpp
+        src/endpoint/UsersEndpoint.cpp
+        src/endpoint/TweetsEndpoint.cpp
+        src/endpoint/CommentsEndpoint.cpp
+        src/endpoint/NewsFeedEndpoint.cpp
+        src/model/User.cpp
+        src/RestServer.cpp
+        )
+
+add_library(fake_twitter STATIC ${SOURCES})
+target_include_directories(fake_twitter PUBLIC include)
+target_compile_features(fake_twitter PRIVATE cxx_std_17)
+target_link_libraries(fake_twitter PUBLIC mypistache rapidjson sqlpp11 my-sqlpp11-connector-postgresql)
 
 add_executable(app src/app.cpp)
-#target_include_directories(app PRIVATE include)
 target_compile_features(app PRIVATE cxx_std_17)
 #target_compile_options(app PRIVATE -fconcepts)
-target_link_libraries(app mypistache rapidjson sqlpp11 sqlpp11-connector-sqlite3 fake_twitter)
+target_link_libraries(app PRIVATE fake_twitter)
 
 add_executable(fake_db src/fake_db.cpp)
 target_compile_features(fake_db PRIVATE cxx_std_17)
-target_include_directories(fake_db PRIVATE include)
-target_link_libraries(fake_db sqlpp11-connector-sqlite3)
-
-
+target_link_libraries(fake_db PRIVATE fake_twitter sqlpp11 my-sqlpp11-connector-postgresql)

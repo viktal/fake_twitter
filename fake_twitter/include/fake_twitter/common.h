@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string>
 #include <chrono>
+#include <string>
 
 namespace fake_twitter {
 
-    using PasswordHash = long;
-    using Avatar = std::string;
-    using PKey = long;
-    using Date = std::chrono::time_point<std::chrono::system_clock>;
-    using HTML = std::string;
+using PasswordHash = long;
+using Avatar = std::string;
+using PKey = long;
+using Date = std::chrono::time_point<std::chrono::system_clock>;
+using HTML = std::string;
 
-} //fake_twitter
+}  // namespace fake_twitter
