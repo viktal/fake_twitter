@@ -49,6 +49,16 @@ void RestServer::setupRoutes() {
     Delete(router, "/0.0/tweets/drop",
            Routes::bind(&endpoints::TweetsEndpoint::drop, tweetsEndpoint));
 
+    Get(router, "/0.0/tags/show",
+        Routes::bind(&endpoints::TagsEndpoint::show, tagsEndpoint));
+    Post(router, "/0.0/tags/create",
+         Routes::bind(&endpoints::TagsEndpoint::create, tagsEndpoint));
+
+    Get(router, "/0.0/tagtweet/show",
+        Routes::bind(&endpoints::TagTweetEndpoint::show, tagtweetEndpoint));
+    Post(router, "/0.0/tagtweet/create",
+         Routes::bind(&endpoints::TagTweetEndpoint::create, tagtweetEndpoint));
+
     Post(router, "/0.0/tweets/like",
          Routes::bind(&endpoints::TweetsEndpoint::like, tweetsEndpoint));
     Delete(router, "/0.0/tweets/unlike",
@@ -79,6 +89,16 @@ RestServer::RestServer(Address addr,
         std::make_unique<repository::TweetsRepository>(connectionsPool);
     tweetsEndpoint =
         std::make_shared<endpoints::TweetsEndpoint>(tweetsRepository);
+
+    tagsRepository =
+        std::make_unique<repository::TagsRepository>(connectionsPool);
+    tagsEndpoint =
+        std::make_shared<endpoints::TagsEndpoint>(tagsRepository);
+
+    tagtweetRepository =
+        std::make_unique<repository::TagTweetRepository>(connectionsPool);
+    tagtweetEndpoint =
+        std::make_shared<endpoints::TagTweetEndpoint>(tagtweetRepository);
 
     newsFeedRepository =
         std::make_unique<repository::NewsFeedRepository>(connectionsPool);
