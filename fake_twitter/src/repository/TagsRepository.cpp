@@ -10,7 +10,7 @@ TagsRepository::TagsRepository(std::shared_ptr<DBConnectionsPool> pool) {
 std::unique_ptr<model::Tag> TagsRepository::get(PKey id) {
     auto query = select(all_of(tabTags)).from(tabTags).where(tabTags.id == id);
 
-    auto result = pool->run(query);
+    auto result = pool->get_connection()(query);
     if (result.empty()) {
         return nullptr;
     }
@@ -24,7 +24,7 @@ std::unique_ptr<model::Tag> TagsRepository::get(PKey id) {
 }
 
 model::Tag TagsRepository::create(const std::string& title) {
-    auto newid = pool->run(sqlpp::postgresql::insert_into(tabTags)
+    auto newid = pool->get_connection()(sqlpp::postgresql::insert_into(tabTags)
                                .set(tabTags.title = title)
                                .returning(tabTags.id));
 

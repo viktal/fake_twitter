@@ -13,7 +13,7 @@ std::unique_ptr<model::TagTweet> TagTweetRepository::get(PKey id) {
                      .from(tabTagTweet)
                      .where(tabTagTweet.id == id);
 
-    auto result = pool->run(query);
+    auto result = pool->get_connection()(query);
     if (result.empty()) {
         return nullptr;
     }
@@ -28,7 +28,7 @@ std::unique_ptr<model::TagTweet> TagTweetRepository::get(PKey id) {
 
 model::TagTweet TagTweetRepository::create(const PKey& tweetID,
                                            const PKey& tagID) {
-    auto newid = pool->run(
+    auto newid = pool->get_connection()(
         sqlpp::postgresql::insert_into(tabTagTweet)
             .set(tabTagTweet.tweetID = tweetID, tabTagTweet.tagID = tagID)
             .returning(tabTagTweet.id));
