@@ -67,8 +67,12 @@ model::User UsersRepository::create(const std::string& name,
 }
 
 bool UsersRepository::drop(PKey id) {
-    return pool->get_connection()(
-        remove_from(tabUsers).where(tabUsers.id == id));
+    auto result = pool->get_connection()(
+            select(tabFollower.addresser)
+                    .from(tabFollower)
+                    .where(tabFollower.author == id ));
+    std::cout << "gg" << result.size();
+    return pool->get_connection()(remove_from(tabUsers).where(tabUsers.id == id));
 }
 
 void UsersRepository::update(PKey id, std::optional<std::string> name) {

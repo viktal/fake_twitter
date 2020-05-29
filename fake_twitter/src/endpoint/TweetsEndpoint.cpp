@@ -35,6 +35,11 @@ void TweetsEndpoint::drop(const Pistache::Http::Request& request,
 
     std::unique_ptr<model::Tweet> tweet = tweetsRepository->get(id);
 
+    if (!tweet.get()) {
+        response.send(Pistache::Http::Code::Not_Found, "Not tweet with this id");
+        return;
+    }
+
     if (!request.cookies().has("session")) {
         response.send(Pistache::Http::Code::Unauthorized, "User unauthorized");
         return;

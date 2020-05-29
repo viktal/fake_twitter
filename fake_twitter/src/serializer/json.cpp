@@ -188,3 +188,35 @@ model::Tweet serialization::from_json<model::Tweet>(const std::string& json) {
         document["author"].Get<PKey>(),   tp,
         document["rating"].Get<long>(), document["retweets"].Get<long>()};
 }
+
+std::string serialization::to_json(model::Tag tag) {
+    Document d;
+    d.SetObject();
+    rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+    d.AddMember("id", tag.id, allocator);
+    d.AddMember("title", Value().SetString(StringRef(tag.title.c_str())),
+                allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+
+    return buffer.GetString();
+}
+
+std::string serialization::to_json(model::TagTweet tagtweet) {
+    Document d;
+    d.SetObject();
+    rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+    d.AddMember("id", tagtweet.id, allocator);
+    d.AddMember("tweetID", tagtweet.tweetID, allocator);
+    d.AddMember("tagID", tagtweet.tagID, allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+
+    return buffer.GetString();
+}

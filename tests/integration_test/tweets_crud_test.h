@@ -9,9 +9,8 @@ using namespace Pistache;
 using namespace fake_twitter;
 static auto rnd = std::mt19937(123);
 
-void make_tweets(
-    Http::Client& client, std::vector<UserCredentials>& credentials,
-    int N) {
+void make_tweets(Http::Client& client,
+                 std::vector<UserCredentials>& credentials, int N) {
     std::vector<Async::Promise<Http::Response>> responses;
     std::vector<model::Tweet> insertedTweets;
     std::mutex lock;
@@ -47,25 +46,26 @@ void make_tweets(
 }
 
 void select_tweets(Http::Client& client,
-                   const std::vector<UserCredentials>& credential, bool expect_fail) {
+                   const std::vector<UserCredentials>& credential,
+                   bool expect_fail) {
     std::vector<Async::Promise<Http::Response>> responses;
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/tweets/show?";
 
-    for (const auto& cred: credential) {
+    for (const auto& cred : credential) {
         for (const auto& tweet : cred.tweets) {
             auto geturl = url + "id=" + std::to_string(tweet.id);
             auto response = client.get(geturl).send();
             response.then(
                 [tweet, &expect_fail](Http::Response rsp) {
-                  if (expect_fail)
-                      EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
-                  else {
-                      EXPECT_EQ(rsp.code(), Http::Code::Ok);
-                      auto db_tweet =
-                          serialization::from_json<model::Tweet>(rsp.body());
-                      EXPECT_EQ(db_tweet, tweet);
-                  }
+                    if (expect_fail)
+                        EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
+                    else {
+                        EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                        auto db_tweet =
+                            serialization::from_json<model::Tweet>(rsp.body());
+                        EXPECT_EQ(db_tweet, tweet);
+                    }
                 },
                 onfail);
             responses.push_back(std::move(response));
@@ -74,25 +74,28 @@ void select_tweets(Http::Client& client,
 
     awaitall(responses);
 }
-//void drop_tweets(Http::Client& client, const std::vector<model::Tweet>& tweets,
-//                 std::vector<UserCredentials> credentials, bool expect_fail) {
-//    std::vector<Async::Promise<Http::Response>> responses;
-//    const std::string url =
-//        "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/tweets/drop?";
-//
-//    for (const auto& tweet : tweets) {
-//        auto deleteurl = url + "id=" + std::to_string(tweet.id);
-//        credentials
-//        auto response = client.del(deleteurl).cookie(credentials).send();
-//        response.then(
-//            [tweet, expect_fail](Http::Response rsp) {
-//                if (expect_fail)
-//                    EXPECT_EQ(rsp.code(), Http::Code::Bad_Request);
-//                else
-//                    EXPECT_EQ(rsp.code(), Http::Code::Ok);
-//            },
-//            onfail);
-//        responses.push_back(std::move(response));
-//    }
-//    awaitall(responses);
-//}
+void drop_tweets(Http::Client& client, std::vector<UserCredentials> credentials,
+                 bool expect_fail) {
+    std::vector<Async::Promise<Http::Response>> responses;
+    const std::string url =
+        "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/tweets/drop?";
+
+    for (const auto& cred: credentials) {
+        for (const auto& tweet : cred.tweets) {
+            auto deleteurl = url + "id=" + std::to_string(tweet.id);
+            auto response =
+                client.del(deleteurl).cookie(cred.session).send();
+            response.then(
+                [tweet, expect_fail](Http::Response rsp) {
+                  if (expect_fail)
+                      EXPECT_EQ(rsp.code(), Http::Code::Not_Found);
+                  else
+                      EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                },
+                onfail);
+            responses.push_back(std::move(response));
+        }
+    }
+
+    awaitall(responses);
+}

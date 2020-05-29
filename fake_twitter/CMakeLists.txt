@@ -3,10 +3,14 @@ set(SOURCES
         src/repository/TweetsRepository.cpp
         src/repository/UsersRepository.cpp
         src/repository/CommentsRepository.cpp
+        src/repository/TagsRepository.cpp
+        src/repository/TagTweetRepository.cpp
         src/repository/NewsFeedRepository.cpp
         src/endpoint/UsersEndpoint.cpp
         src/endpoint/TweetsEndpoint.cpp
         src/endpoint/CommentsEndpoint.cpp
+        src/endpoint/TagsEndpoint.cpp
+        src/endpoint/TagTweetEndpoint.cpp
         src/endpoint/NewsFeedEndpoint.cpp
         src/model/User.cpp
         src/model/Tweet.cpp

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "fake_twitter/common.h"
+#include "fake_twitter/model/Comment.h"
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/utils.h"
@@ -166,26 +167,211 @@ static auto rnd = std::mt19937(123);
 
 std::string body() {
     std::string body;
-    static std::string alphanum =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-    static std::uniform_int_distribution<int> bodySizeSampler(5, 250);
+    static std::vector<std::string> words ={"Name",
+                                             "create",
+                                             "fake",
+                                             "free",
+                                             "foo",
+                                             "drake",
+                                             "male",
+                                             "xxx",
+                                             "gg",
+                                             "ruin",
+                                             "team",
+                                             "fake",
+                                             "gg",
+                                             "csgo",
+                                             "tree",
+                                             "polindro,",
+                                             "algorithm",
+                                             "c++",
+                                             "you",
+                                             "aaaaa",
+                                             "traightor",
+                                             "fake",
+                                             "trash",
+                                             "rating",
+                                             "group",
+                                             "discord",
+                                             "tab",
+                                             "alright",
+                                             "train",
+                                             "gabe",
+                                             "create",
+                                             "delete",
+                                             "get",
+                                             "report",
+                                             "compendium",
+                                             "january",
+                                             "december",
+                                             "track",
+                                             "song",
+                                             "Nike",
+                                             "Jordan",
+                                             "Adidas",
+                                             "cat",
+                                             "dog",
+                                             "pacific",
+                                             "pen",
+                                             "amigo",
+                                             "rioted",
+                                             "wagons",
+                                             "payors",
+                                             "nantle",
+                                             "oxshoe",
+                                             "yolked",
+                                             "parkee",
+                                             "vespal",
+                                             "peages",
+                                             "siryan",
+                                             "worldwide",
+                                             "impressive",
+                                             "ideal",
+                                             "cold",
+                                             "significant",
+                                             "sport",
+                                             "success",
+                                             "puppy",
+                                             "friend",
+                                             "rainbow",
+                                             "grandiose",
+                                             "greatest",
+                                             "strong",
+                                             "football",
+                                             "stork",
+                                             "team",
+                                             "stadium",
+                                             "gift"};
+    static std::uniform_int_distribution<int> bodySizeSampler(2, 10);
     auto num = bodySizeSampler(rnd);
     for (int i = 0; i < num; i++) {
-        static std::uniform_int_distribution<int> alphanumIndSampler(
-            0, alphanum.size() - 1);
-        body += alphanum[alphanumIndSampler(rnd)];
+        static std::uniform_int_distribution<int> bodyIndSampler(
+            0, words.size() - 1);
+        static std::uniform_int_distribution<int> bodyHashSampler(
+            0, 2);
+        if (bodyHashSampler(rnd) % 3 == 0) {
+            body += "#";
+        }
+        body += words[bodyIndSampler(rnd)];
+        body += " ";
     }
     return body;
 }
 model::Tweet object(int userCount) {
-    static std::uniform_int_distribution<int> bodySizeSampler(1, userCount);
-    int num = bodySizeSampler(rnd);
+    static std::uniform_int_distribution<int> userCountSizeSampler(1, userCount);
+    int num = userCountSizeSampler(rnd);
     return model::Tweet{0, body(), num};
 }
 
 }  // namespace tweet
+
+namespace comment {
+static auto rnd = std::mt19937(123);
+
+std::string body() {
+    std::string body;
+    static std::vector<std::string> words ={"Name",
+                                             "create",
+                                             "fake",
+                                             "free",
+                                             "foo",
+                                             "drake",
+                                             "male",
+                                             "xxx",
+                                             "gg",
+                                             "ruin",
+                                             "team",
+                                             "fake",
+                                             "gg",
+                                             "csgo",
+                                             "tree",
+                                             "polindro,",
+                                             "algorithm",
+                                             "c++",
+                                             "you",
+                                             "aaaaa",
+                                             "traightor",
+                                             "fake",
+                                             "trash",
+                                             "rating",
+                                             "group",
+                                             "discord",
+                                             "tab",
+                                             "alright",
+                                             "train",
+                                             "gabe",
+                                             "create",
+                                             "delete",
+                                             "get",
+                                             "report",
+                                             "compendium",
+                                             "january",
+                                             "december",
+                                             "track",
+                                             "song",
+                                             "Nike",
+                                             "Jordan",
+                                             "Adidas",
+                                             "cat",
+                                             "dog",
+                                             "pacific",
+                                             "pen",
+                                             "amigo",
+                                             "rioted",
+                                             "wagons",
+                                             "payors",
+                                             "nantle",
+                                             "oxshoe",
+                                             "yolked",
+                                             "parkee",
+                                             "vespal",
+                                             "peages",
+                                             "siryan",
+                                             "worldwide",
+                                             "impressive",
+                                             "ideal",
+                                             "cold",
+                                             "significant",
+                                             "sport",
+                                             "success",
+                                             "puppy",
+                                             "friend",
+                                             "rainbow",
+                                             "grandiose",
+                                             "greatest",
+                                             "strong",
+                                             "football",
+                                             "stork",
+                                             "team",
+                                             "stadium",
+                                             "gift"};
+    static std::uniform_int_distribution<int> bodySizeSampler(2, 10);
+    auto num = bodySizeSampler(rnd);
+    for (int i = 0; i < num; i++) {
+        static std::uniform_int_distribution<int> bodyIndSampler(
+            0, words.size() - 1);
+        static std::uniform_int_distribution<int> bodyHashSampler(
+            0, 2);
+        if (bodyHashSampler(rnd) % 3 == 0) {
+            body += "#";
+        }
+        body += words[bodyIndSampler(rnd)];
+        body += " ";
+    }
+    return body;
+}
+model::Comment object(int userCount, int tweetCount) {
+    static std::uniform_int_distribution<int> userCountSizeSampler(1, userCount);
+    int num = userCountSizeSampler(rnd);
+    static std::uniform_int_distribution<int> tweetCountSizeSampler(1, tweetCount);
+    int num1 = tweetCountSizeSampler(rnd);
+    model::Comment comment;
+    comment.set(0, body(), num, num1);
+    return comment;
+}
+
+}  // namespace comment
+
 
 void create_postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(
@@ -243,7 +429,7 @@ void create_postgresql_tables(sqlpp::postgresql::connection& db) {
         "\n"
         "\n"
         "\n"
-        "CREATE TABLE Tag (\n"
+        "CREATE TABLE Tags (\n"
         "        \"id\" serial NOT NULL,\n"
         "        \"title\" VARCHAR(30) NOT NULL,\n"
         "        CONSTRAINT \"Tag_pk\" PRIMARY KEY (\"id\")\n"
@@ -255,8 +441,8 @@ void create_postgresql_tables(sqlpp::postgresql::connection& db) {
         "\n"
         "CREATE TABLE TagTweet (\n"
         "        \"id\" serial NOT NULL,\n"
-        "        \"tweetID\" integer NOT NULL,\n"
-        "        \"tagID\" integer NOT NULL,\n"
+        "        \"tweetid\" integer NOT NULL,\n"
+        "        \"tagid\" integer NOT NULL,\n"
         "        CONSTRAINT \"TagTweet_pk\" PRIMARY KEY (\"id\")\n"
         ") WITH (\n"
         "  OIDS=FALSE\n"
@@ -264,10 +450,10 @@ void create_postgresql_tables(sqlpp::postgresql::connection& db) {
         "\n"
         "\n"
         "\n"
-        "CREATE TABLE LikeTweet (\n"
+        "CREATE TABLE Likes (\n"
         "        \"id\" serial NOT NULL,\n"
-        "        \"userID\" integer NOT NULL,\n"
-        "        \"tweetID\" integer NOT NULL,\n"
+        "        \"author\" integer NOT NULL,\n"
+        "        \"twit\" integer NOT NULL,\n"
         "        CONSTRAINT \"LikeTweet_pk\" PRIMARY KEY (\"id\")\n"
         ") WITH (\n"
         "  OIDS=FALSE\n"
@@ -277,28 +463,28 @@ void create_postgresql_tables(sqlpp::postgresql::connection& db) {
         "\n"
         "\n"
         "ALTER TABLE Tweets ADD CONSTRAINT \"Tweets_fk0\" FOREIGN KEY "
-        "(\"author\") REFERENCES Users(\"id\");\n"
+        "(\"author\") REFERENCES Users(\"id\") ON DELETE CASCADE;\n"
         "\n"
         "ALTER TABLE Comments ADD CONSTRAINT \"Comments_fk0\" FOREIGN KEY "
-        "(\"author\") REFERENCES Users(\"id\");\n"
+        "(\"author\") REFERENCES Users(\"id\") ON DELETE CASCADE;\n"
         "ALTER TABLE Comments ADD CONSTRAINT \"Comments_fk1\" FOREIGN KEY "
-        "(\"comment_for\") REFERENCES Tweets(\"id\");\n"
+        "(\"comment_for\") REFERENCES Tweets(\"id\") ON DELETE CASCADE;\n"
         "\n"
         "ALTER TABLE Follower ADD CONSTRAINT \"Follower_fk0\" FOREIGN "
-        "KEY (\"author\") REFERENCES Users(\"id\");\n"
+        "KEY (\"author\") REFERENCES Users(\"id\") ON DELETE CASCADE;\n"
         "ALTER TABLE Follower ADD CONSTRAINT \"Follower_fk1\" FOREIGN "
-        "KEY (\"addresser\") REFERENCES Users(\"id\");\n"
+        "KEY (\"addresser\") REFERENCES Users(\"id\") ON DELETE CASCADE;\n"
         "\n"
         "\n"
         "ALTER TABLE TagTweet ADD CONSTRAINT \"TagTweet_fk0\" FOREIGN KEY "
-        "(\"tweetID\") REFERENCES Tweets(\"id\");\n"
+        "(\"tweetid\") REFERENCES Tweets(\"id\") ON DELETE CASCADE;\n"
         "ALTER TABLE TagTweet ADD CONSTRAINT \"TagTweet_fk1\" FOREIGN KEY "
-        "(\"tagID\") REFERENCES Tag(\"id\");\n"
+        "(\"tagid\") REFERENCES Tags(\"id\") ON DELETE CASCADE;\n"
         "\n"
-        "ALTER TABLE LikeTweet ADD CONSTRAINT \"LikeTweet_fk0\" FOREIGN KEY "
-        "(\"userID\") REFERENCES Tweets(\"id\");\n"
-        "ALTER TABLE LikeTweet ADD CONSTRAINT \"LikeTweet_fk1\" FOREIGN KEY "
-        "(\"tweetID\") REFERENCES Users(\"id\");\n"
+        "ALTER TABLE Likes ADD CONSTRAINT \"Likes_fk0\" FOREIGN KEY "
+        "(\"author\") REFERENCES Users(\"id\") ON DELETE CASCADE;\n"
+        "ALTER TABLE Likes ADD CONSTRAINT \"Likes_fk1\" FOREIGN KEY "
+        "(\"twit\") REFERENCES Tweets(\"id\") ON DELETE CASCADE;\n"
         "");
 }
 
