@@ -13,8 +13,8 @@ TEST(test_serialiser, json_user) {
         "\"friends_count\":0,\"password_hash\":123,\"salt\":\"123\"}";
     std::string user = serialization::to_json(fake_user);
 
-    EXPECT_EQ(user, json);
-    EXPECT_EQ(serialization::from_json<model::User>(user), fake_user);
+    ASSERT_EQ(user, json);
+    ASSERT_EQ(serialization::from_json<model::User>(user), fake_user);
 }
 
 TEST(test_serialiser, json_tweet) {
@@ -27,6 +27,6 @@ TEST(test_serialiser, json_tweet) {
             << date::format("%FT%TZ", time) << R"(","retweets":3,"rating":2})";
     std::string tweet = serialization::to_json(fake_tweet);
 
-    EXPECT_EQ(tweet, builder.str());
-    EXPECT_EQ(serialization::from_json<model::Tweet>(tweet), fake_tweet);
+    ASSERT_EQ(tweet, builder.str());
+    ASSERT_EQ(serialization::from_json<model::Tweet>(tweet), fake_tweet);
 }
