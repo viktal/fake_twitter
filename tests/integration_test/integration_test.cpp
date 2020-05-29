@@ -16,19 +16,19 @@ TEST_F(test_fixture_restserver, test_many_users_create_show) {
     auto credentials = make_users(*client, users);
     do_auth(*client, credentials);
 
-    make_tweets(*client, credentials, per_user_max_tweets);
-    select_tweets(*client, credentials, false);
-    drop_tweets(*client, credentials, false);
-
-//     can't select after drop or drop twice
-    select_tweets(*client, credentials, true);
-    drop_tweets(*client, credentials, true);
-
-    update_users(*client, credentials);
-    select_users(*client, credentials, false);
-    drop_users(*client, credentials, false);
-
-//     can't select after drop or drop twice
-    select_users(*client, credentials, true);
-    drop_users(*client, credentials, true);
+//    make_tweets(*client, credentials, per_user_max_tweets);
+//    select_tweets(*client, credentials, false);
+//    drop_tweets(*client, credentials, false);
+//
+////     can't select after drop or drop twice
+//    select_tweets(*client, credentials, true);
+//    drop_tweets(*client, credentials, true);
+//
+//    update_users(*client, credentials);
+//    select_users(*client, credentials, false);
+//    drop_users(*client, credentials, false);
+//
+////     can't select after drop or drop twice
+//    select_users(*client, credentials, true);
+//    drop_users(*client, credentials, true);
 }

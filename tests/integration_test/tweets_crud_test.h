@@ -47,7 +47,7 @@ void make_tweets(Http::Client& client,
 
 void select_tweets(Http::Client& client,
                    const std::vector<WorkloadInfo>& credential,
-                   bool ASSERT_fail) {
+                   bool expect_fail) {
     std::vector<Async::Promise<Http::Response>> responses;
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/tweets/show?";
@@ -57,8 +57,8 @@ void select_tweets(Http::Client& client,
             auto geturl = url + "id=" + std::to_string(tweet.id);
             auto response = client.get(geturl).send();
             response.then(
-                [tweet, &ASSERT_fail](Http::Response rsp) {
-                    if (ASSERT_fail)
+                [tweet, &expect_fail](Http::Response rsp) {
+                    if (expect_fail)
                         ASSERT_EQ(rsp.code(), Http::Code::Bad_Request);
                     else {
                         ASSERT_EQ(rsp.code(), Http::Code::Ok);
@@ -75,7 +75,7 @@ void select_tweets(Http::Client& client,
     awaitall(responses);
 }
 void drop_tweets(Http::Client& client, std::vector<WorkloadInfo> credentials,
-                 bool ASSERT_fail) {
+                 bool expect_fail) {
     std::vector<Async::Promise<Http::Response>> responses;
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/tweets/drop?";
@@ -85,8 +85,8 @@ void drop_tweets(Http::Client& client, std::vector<WorkloadInfo> credentials,
             auto deleteurl = url + "id=" + std::to_string(tweet.id);
             auto response = client.del(deleteurl).cookie(cred.session).send();
             response.then(
-                [tweet, ASSERT_fail](Http::Response rsp) {
-                    if (ASSERT_fail)
+                [tweet, expect_fail](Http::Response rsp) {
+                    if (expect_fail)
                         ASSERT_EQ(rsp.code(), Http::Code::Not_Found);
                     else
                         ASSERT_EQ(rsp.code(), Http::Code::Ok);

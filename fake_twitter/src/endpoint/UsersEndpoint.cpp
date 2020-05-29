@@ -166,6 +166,7 @@ void UsersEndpoint::unfollow(const Pistache::Rest::Request& request,
     else
         response.send(Pistache::Http::Code::Bad_Request);
 }
+
 void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
                                   Pistache::Http::ResponseWriter response) {
     auto username_optional = request.query().get("username");

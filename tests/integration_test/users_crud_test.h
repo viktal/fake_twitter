@@ -67,7 +67,8 @@ void do_auth(Http::Client& client, std::vector<WorkloadInfo>& credentials) {
         auto response = client.post(posturl).send();
         response.then(
             [i, &credentials](Http::Response rsp) {
-                ASSERT_EQ(rsp.code(), Http::Code::Ok);
+                ASSERT_EQ(rsp.code(), Http::Code::Ok)
+                    << "Failed with body " << rsp.body();
                 ASSERT_TRUE(rsp.cookies().has("session"));
                 credentials[i].session = rsp.cookies().get("session");
             },
@@ -100,7 +101,7 @@ void update_users(Http::Client& client,
 
 void select_users(Http::Client& client,
                   const std::vector<WorkloadInfo>& credentials,
-                  bool ASSERT_fail) {
+                  bool expect_fail) {
     std::vector<Async::Promise<Http::Response>> responses;
 
     const std::string url =
@@ -110,8 +111,8 @@ void select_users(Http::Client& client,
         auto geturl = url + "id=" + std::to_string(cred.user.id);
         auto response = client.get(geturl).send();
         response.then(
-            [&cred, &ASSERT_fail](Http::Response rsp) {
-                if (ASSERT_fail)
+            [&cred, &expect_fail](Http::Response rsp) {
+                if (expect_fail)
                     ASSERT_EQ(rsp.code(), Http::Code::Bad_Request);
                 else {
                     ASSERT_EQ(rsp.code(), Http::Code::Ok);
@@ -128,7 +129,7 @@ void select_users(Http::Client& client,
 
 void drop_users(Http::Client& client,
                 const std::vector<WorkloadInfo>& credentials,
-                bool ASSERT_fail) {
+                bool expect_fail) {
     std::vector<Async::Promise<Http::Response>> responses;
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/users/drop?";
@@ -138,7 +139,7 @@ void drop_users(Http::Client& client,
         auto response = client.del(delurl).cookie(cred.session).send();
         response.then(
             [&](Http::Response rsp) {
-                if (ASSERT_fail)
+                if (expect_fail)
                     ASSERT_EQ(rsp.code(), Http::Code::Bad_Request);
                 else
                     ASSERT_EQ(rsp.code(), Http::Code::Ok);
