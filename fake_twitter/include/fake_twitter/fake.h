@@ -377,9 +377,10 @@ void create_postgresql_tables(
 }
 
 void drop_postgresql_tables(sqlpp::postgresql::connection& db) {
+    db.execute("DROP TABLE IF EXISTS Likes CASCADE;");
     db.execute("DROP TABLE IF EXISTS LikeTweet CASCADE;");
     db.execute("DROP TABLE IF EXISTS TagTweet CASCADE;");
-    db.execute("DROP TABLE IF EXISTS Tag CASCADE;");
+    db.execute("DROP TABLE IF EXISTS Tags CASCADE;");
     db.execute("DROP TABLE IF EXISTS Follower CASCADE;");
     db.execute("DROP TABLE IF EXISTS Comments CASCADE;");
     db.execute("DROP TABLE IF EXISTS Tweets CASCADE;");

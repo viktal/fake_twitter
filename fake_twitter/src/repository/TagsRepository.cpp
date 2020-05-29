@@ -25,8 +25,8 @@ std::unique_ptr<model::Tag> TagsRepository::get(PKey id) {
 
 model::Tag TagsRepository::create(const std::string& title) {
     auto newid = pool->get_connection()(sqlpp::postgresql::insert_into(tabTags)
-                               .set(tabTags.title = title)
-                               .returning(tabTags.id));
+                                            .set(tabTags.title = title)
+                                            .returning(tabTags.id));
 
     return std::move(model::Tag{PKey(newid.front().id.value()), title});
 }
