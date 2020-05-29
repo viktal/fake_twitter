@@ -6,6 +6,7 @@
 #include <ctime>
 #include <functional>
 #include <iomanip>
+#include <numeric>
 #include <sstream>
 #include <string>
 
