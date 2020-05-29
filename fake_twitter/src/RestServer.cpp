@@ -73,8 +73,6 @@ RestServer::RestServer(Address addr,
 
     auto config_ptr =
         std::make_shared<sqlpp::postgresql::connection_config>(config);
-    auto connection =
-        std::make_unique<sqlpp::postgresql::connection>(config_ptr);
     auto connectionsPool = std::make_shared<repository::DBConnectionsPool>(
         std::move(config_ptr), 10);
 
