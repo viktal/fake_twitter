@@ -60,15 +60,15 @@ struct password_hash {
     };
     using _traits = sqlpp::make_traits<sqlpp::integer>;
 };
-struct avatar {
+struct salt {
     struct _alias_t {
-        static constexpr const char _literal[] = "avatar";
+        static constexpr const char _literal[] = "salt";
         using _name_t = sqlpp::make_char_sequence<sizeof(_literal), _literal>;
         template <typename T>
         struct _member_t {
-            T avatar;
-            T& operator()() { return avatar; }
-            const T& operator()() const { return avatar; }
+            T salt;
+            T& operator()() { return salt; }
+            const T& operator()() const { return salt; }
         };
     };
     using _traits = sqlpp::make_traits<sqlpp::varchar>;
@@ -103,7 +103,7 @@ struct friends_count {
 
 struct TabUsers
     : sqlpp::table_t<TabUsers, TabUsers_::id, TabUsers_::name,
-                     TabUsers_::username, TabUsers_::avatar,
+                     TabUsers_::username, TabUsers_::salt,
                      TabUsers_::password_hash, TabUsers_::followers_count,
                      TabUsers_::friends_count> {
     struct _alias_t {

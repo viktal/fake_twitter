@@ -6,11 +6,11 @@
 #include <random>
 #include <string>
 #include <vector>
-//#include <sqlpp11/sqlite3/sqlite3.h>
 
 #include "fake_twitter/common.h"
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/model/User.h"
+#include "fake_twitter/utils.h"
 
 namespace fake_twitter::fake {
 namespace user {
@@ -147,9 +147,16 @@ PasswordHash hash() {
     return hashSampler(rnd);
 }
 
-model::User object() {
-    // TODO придумать, что делать с ID
-    return model::User{0, name(), username(), hash()};
+model::User object(const PKey& id = 0, const std::string& postfix = "",
+                   const std::string& password = "") {
+    PasswordHash pswdhash;
+    std::string salt = utils::salt();
+    if (password.size() != 0)
+        pswdhash = utils::make_password_hash(salt, password);
+    else
+        pswdhash = hash();
+    return model::User{
+        0, name() + postfix, username() + postfix, pswdhash, salt, 0, 0};
 }
 
 }  // namespace user
@@ -180,14 +187,14 @@ model::Tweet object(int userCount) {
 
 }  // namespace tweet
 
-void postgresql_tables(sqlpp::postgresql::connection& db) {
+void create_postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(
         "CREATE TABLE Users (\n"
         "        \"id\" serial NOT NULL,\n"
         "        \"name\" varchar(255) NOT NULL,\n"
         "        \"username\" varchar(255) NOT NULL UNIQUE,\n"
-        "        \"password_hash\" integer NOT NULL,\n"
-        "        \"avatar\" VARCHAR(255) NOT NULL,\n"
+        "        \"password_hash\" bigint NOT NULL,\n"
+        "        \"salt\" varchar(255) NOT NULL,\n"
         "        \"followers_count\" integer NOT NULL DEFAULT '0',\n"
         "        \"friends_count\" integer NOT NULL DEFAULT '0',\n"
         "        CONSTRAINT \"Users_pk\" PRIMARY KEY (\"id\")\n"
@@ -295,18 +302,25 @@ void postgresql_tables(sqlpp::postgresql::connection& db) {
         "");
 }
 
-//    void sqlite3tables(std::string path_to_db, bool debug = false) {
-//        sqlpp::sqlite3::connection_config config;
-//        config.path_to_database = path_to_db;
-//        config.flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
-//        config.debug = debug;
-//        sqlpp::sqlite3::connection db(config);
-//        sqlite3tables(db);
-//    }
-
-void postgresql_tables(
+void create_postgresql_tables(
     const std::shared_ptr<sqlpp::postgresql::connection_config>& config) {
     sqlpp::postgresql::connection db(config);
-    postgresql_tables(db);
+    create_postgresql_tables(db);
+}
+
+void drop_postgresql_tables(sqlpp::postgresql::connection& db) {
+    db.execute("DROP TABLE IF EXISTS LikeTweet CASCADE;");
+    db.execute("DROP TABLE IF EXISTS TagTweet CASCADE;");
+    db.execute("DROP TABLE IF EXISTS Tag CASCADE;");
+    db.execute("DROP TABLE IF EXISTS Follower CASCADE;");
+    db.execute("DROP TABLE IF EXISTS Comments CASCADE;");
+    db.execute("DROP TABLE IF EXISTS Tweets CASCADE;");
+    db.execute("DROP TABLE IF EXISTS Users CASCADE;");
+}
+
+void drop_postgresql_tables(
+    const std::shared_ptr<sqlpp::postgresql::connection_config>& config) {
+    sqlpp::postgresql::connection db(config);
+    drop_postgresql_tables(db);
 }
 }  // namespace fake_twitter::fake

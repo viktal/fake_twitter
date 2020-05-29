@@ -12,6 +12,7 @@
 #include "fake_twitter/repository/DBConnectionsPool.h"
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
+#include "fake_twitter/utils.h"
 
 namespace fake_twitter::repository {
 class UsersRepository {
@@ -22,13 +23,18 @@ public:
 
     virtual std::unique_ptr<model::User> get(PKey id);
 
+    virtual std::unique_ptr<model::User> get(const std::string& username);
+
+    virtual std::unique_ptr<model::User> get(
+        std::optional<PKey> id, std::optional<std::string> username);
+
     virtual model::User create(const std::string& name,
-                               const std::string& username);
+                               const std::string& username,
+                               const std::string& password);
 
     virtual bool drop(PKey id);
 
-    virtual void update(PKey id, std::optional<std::string> name,
-                        std::optional<std::string> avatar);
+    virtual void update(PKey id, std::optional<std::string> name);
     virtual std::unique_ptr<model::Followers> getfollow(PKey id);
 
     virtual bool follow(PKey author, PKey addresser);

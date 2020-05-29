@@ -33,7 +33,8 @@ int main() {
     config->debug = true;
     sqlpp::postgresql::connection db(config);
     std::cerr << __FILE__ << ": " << __LINE__ << std::endl;
-    fake_twitter::fake::postgresql_tables(db);
+    fake_twitter::fake::drop_postgresql_tables(db);
+    fake_twitter::fake::create_postgresql_tables(db);
 
     int userCount = 10;
     int tweetCount = 10;
@@ -45,7 +46,7 @@ int main() {
             tabUsers.name = user.name, tabUsers.username = user.username,
             tabUsers.password_hash = user.password_hash,
             tabUsers.friends_count = 0, tabUsers.followers_count = 0,
-            tabUsers.avatar = "path"));
+            tabUsers.salt = "123"));
     }
 
     TabTweets tabTweets;

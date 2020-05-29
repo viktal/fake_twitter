@@ -3,7 +3,7 @@
 using namespace rapidjson;
 using namespace fake_twitter;
 
-std::string serialization::to_json(model::User user) {
+std::string serialization::to_json(const model::User& user) {
     Document d;
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
@@ -15,9 +15,9 @@ std::string serialization::to_json(model::User user) {
                 allocator);
     d.AddMember("followers_count", user.followers_count, allocator);
     d.AddMember("friends_count", user.friends_count, allocator);
-    d.AddMember("avatar", Value().SetString(StringRef(user.avatar.c_str())),
-                allocator);
     d.AddMember("password_hash", user.password_hash, allocator);
+    d.AddMember("salt", Value().SetString(StringRef(user.salt.c_str())),
+                allocator);
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
@@ -26,17 +26,33 @@ std::string serialization::to_json(model::User user) {
     return buffer.GetString();
 }
 
-std::string serialization::to_json(model::Tweet tweet) {
+std::string serialization::to_json(const utils::Session& session) {
     Document d;
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+    d.AddMember("user_id", session.user_id, allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+
+    return buffer.GetString();
+}
+
+std::string serialization::to_json(const model::Tweet& tweet) {
+    Document d;
+    d.SetObject();
+    rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+    std::string time = date::format("%FT%TZ",
+                                    date::floor<std::chrono::seconds>(tweet.create_date));
 
     d.AddMember("id", tweet.id, allocator);
     d.AddMember("body", Value().SetString(StringRef(tweet.body.c_str())),
                 allocator);
     d.AddMember("author", tweet.author, allocator);
-    d.AddMember("create_date",
-                Value().SetString(StringRef(tweet.create_date.c_str())),
+    d.AddMember("create_date", Value().SetString(StringRef(time.c_str())),
                 allocator);
     d.AddMember("retweets", tweet.retweets, allocator);
     d.AddMember("rating", tweet.rating, allocator);
@@ -143,17 +159,32 @@ model::User serialization::from_json<model::User>(const std::string& json) {
                        document["name"].GetString(),
                        document["username"].GetString(),
                        document["password_hash"].Get<PasswordHash>(),
-                       document["avatar"].GetString(),
+                       document["salt"].GetString(),
                        document["followers_count"].Get<size_t>(),
                        document["friends_count"].Get<size_t>()};
 }
 
 template <>
+utils::Session serialization::from_json<utils::Session>(
+    const std::string& json) {
+    Document document;
+    document.Parse(json.c_str());
+    return utils::Session{document["user_id"].Get<PKey>()};
+}
+
+
+#include <iostream>
+template <>
 model::Tweet serialization::from_json<model::Tweet>(const std::string& json) {
     Document document;
     document.Parse(json.c_str());
+
+    std::istringstream in{document["create_date"].GetString()};
+    date::sys_time<std::chrono::seconds> tp;
+    in >> date::parse("%FT%TZ", tp);
+
     return model::Tweet{
         document["id"].Get<PKey>(),       document["body"].GetString(),
-        document["author"].Get<PKey>(),   document["create_date"].GetString(),
-        document["rating"].Get<size_t>(), document["retweets"].Get<size_t>()};
+        document["author"].Get<PKey>(),   tp,
+        document["rating"].Get<long>(), document["retweets"].Get<long>()};
 }
