@@ -20,7 +20,7 @@ TEST_F(test_fixture_restserver, test_many_users_create_show) {
     select_tweets(*client, workload, false);
     drop_tweets(*client, workload, false);
 
-//     can't select after drop or drop twice
+    //     can't select after drop or drop twice
     select_tweets(*client, workload, true);
     drop_tweets(*client, workload, true);
 
@@ -28,7 +28,7 @@ TEST_F(test_fixture_restserver, test_many_users_create_show) {
     select_users(*client, workload, false);
     drop_users(*client, workload, false);
 
-//     can't select after drop or drop twice
+    //     can't select after drop or drop twice
     select_users(*client, workload, true);
     drop_users(*client, workload, true);
 }

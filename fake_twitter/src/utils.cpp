@@ -11,7 +11,7 @@ std::string fake_twitter::utils::salt() {
 fake_twitter::PasswordHash fake_twitter::utils::make_password_hash(
     const std::string& salt, const std::string& password) {
     // TODO: proper hashing. std::hash is not consistent between runs
-//    return std::hash<std::string>{}(salt + password);
+    //    return std::hash<std::string>{}(salt + password);
     auto tohash = salt + password;
     return std::accumulate(tohash.begin(), tohash.end(), 0);
 }

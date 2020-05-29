@@ -9,8 +9,8 @@ using namespace Pistache;
 using namespace fake_twitter;
 static auto rnd = std::mt19937(123);
 
-void make_tweets(Http::Client& client,
-                 std::vector<WorkloadInfo>& credentials, int N) {
+void make_tweets(Http::Client& client, std::vector<WorkloadInfo>& credentials,
+                 int N) {
     std::vector<Async::Promise<Http::Response>> responses;
     std::vector<model::Tweet> insertedTweets;
     std::mutex lock;
