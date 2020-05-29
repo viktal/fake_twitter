@@ -75,8 +75,8 @@ RestServer::RestServer(Address addr,
         std::make_shared<sqlpp::postgresql::connection_config>(config);
     auto connection =
         std::make_unique<sqlpp::postgresql::connection>(config_ptr);
-    auto connectionsPool =
-        std::make_shared<repository::DBConnectionsPool>(std::move(config_ptr), 10);
+    auto connectionsPool = std::make_shared<repository::DBConnectionsPool>(
+        std::move(config_ptr), 10);
 
     commentsRepository =
         std::make_unique<repository::CommentsRepository>(connectionsPool);
@@ -94,8 +94,7 @@ RestServer::RestServer(Address addr,
 
     tagsRepository =
         std::make_unique<repository::TagsRepository>(connectionsPool);
-    tagsEndpoint =
-        std::make_shared<endpoints::TagsEndpoint>(tagsRepository);
+    tagsEndpoint = std::make_shared<endpoints::TagsEndpoint>(tagsRepository);
 
     tagtweetRepository =
         std::make_unique<repository::TagTweetRepository>(connectionsPool);

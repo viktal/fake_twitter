@@ -36,7 +36,8 @@ void TweetsEndpoint::drop(const Pistache::Http::Request& request,
     std::unique_ptr<model::Tweet> tweet = tweetsRepository->get(id);
 
     if (!tweet.get()) {
-        response.send(Pistache::Http::Code::Not_Found, "Not tweet with this id");
+        response.send(Pistache::Http::Code::Not_Found,
+                      "Not tweet with this id");
         return;
     }
 
@@ -85,7 +86,8 @@ void TweetsEndpoint::create(const Pistache::Http::Request& request,
     body = std::string(document["body"].GetString());
 
     if (!request.cookies().has("session")) {
-        response.send(Pistache::Http::Code::Unauthorized, "User is unauthorized");
+        response.send(Pistache::Http::Code::Unauthorized,
+                      "User is unauthorized");
         return;
     }
 

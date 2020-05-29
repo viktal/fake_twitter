@@ -1,21 +1,21 @@
 #pragma once
 
+#include <sqlpp11/connection_pool.h>
 #include <sqlpp11/postgresql/connection.h>
 #include <sqlpp11/sqlpp11.h>
-#include <sqlpp11/connection_pool.h>
 
 #include <mutex>
 
 namespace fake_twitter::repository {
 
 using DBConnectionsPool =
-sqlpp::connection_pool<sqlpp::postgresql::connection_config,
-    sqlpp::reconnect_policy::auto_reconnect,
-    sqlpp::postgresql::connection>;
+    sqlpp::connection_pool<sqlpp::postgresql::connection_config,
+                           sqlpp::reconnect_policy::auto_reconnect,
+                           sqlpp::postgresql::connection>;
 
 //// TODO: Более разумная многопоточность, сейчас только 1 поток и все
-//class DBConnectionsPool {
-//public:
+// class DBConnectionsPool {
+// public:
 //    explicit DBConnectionsPool(
 //        std::unique_ptr<sqlpp::postgresql::connection> connection);
 //
@@ -25,7 +25,7 @@ sqlpp::connection_pool<sqlpp::postgresql::connection_config,
 //        return (*connection)(query);
 //    };
 //
-//private:
+// private:
 //    std::mutex lock;
 //    std::unique_ptr<sqlpp::postgresql::connection> connection;
 //};

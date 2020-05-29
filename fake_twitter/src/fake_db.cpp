@@ -5,20 +5,20 @@
 #include <iostream>
 
 #include "fake_twitter/fake.h"
-#include "fake_twitter/sqlpp_models/TagTweetTab.h"
-#include "fake_twitter/sqlpp_models/TagsTab.h"
 #include "fake_twitter/sqlpp_models/CommentsTab.h"
 #include "fake_twitter/sqlpp_models/FollowerTab.h"
 #include "fake_twitter/sqlpp_models/LikeTab.h"
+#include "fake_twitter/sqlpp_models/TagTweetTab.h"
+#include "fake_twitter/sqlpp_models/TagsTab.h"
 #include "fake_twitter/sqlpp_models/TweetsTab.h"
 #include "fake_twitter/sqlpp_models/UsersTab.h"
 
 namespace sql = sqlpp::postgresql;
-using fake_twitter::sqlpp_models::TabTagTweet;
-using fake_twitter::sqlpp_models::TabTags;
 using fake_twitter::sqlpp_models::TabComments;
 using fake_twitter::sqlpp_models::TabFollower;
 using fake_twitter::sqlpp_models::TabLikes;
+using fake_twitter::sqlpp_models::TabTags;
+using fake_twitter::sqlpp_models::TabTagTweet;
 using fake_twitter::sqlpp_models::TabTweets;
 using fake_twitter::sqlpp_models::TabUsers;
 
@@ -65,37 +65,37 @@ int main() {
             tabTweets.rating = 0));
     }
 
-
     TabFollower tabFollower;
-    for (int i = 0; i <= userCount*userCount; i++) {
+    for (int i = 0; i <= userCount * userCount; i++) {
         static std::uniform_int_distribution<int> userSizeSampler(1, userCount);
         int num1 = userSizeSampler(rnd);
         int num2 = userSizeSampler(rnd);
         if (num1 != num2) {
             db(insert_into(tabFollower)
-                    .set(tabFollower.author = num1, tabFollower.addresser = num2));
-            //fake_twitter::repository::UsersRepository::follow(num1, num2);
+                   .set(tabFollower.author = num1,
+                        tabFollower.addresser = num2));
+            // fake_twitter::repository::UsersRepository::follow(num1, num2);
         }
     }
 
     TabComments tabComments;
     for (int i = 0; i < commentCount; i++) {
-        auto comment = fake_twitter::fake::comment::object(userCount, tweetCount);
+        auto comment =
+            fake_twitter::fake::comment::object(userCount, tweetCount);
         db(insert_into(tabComments)
-            .set(tabComments.body = comment.body,
+               .set(tabComments.body = comment.body,
                     tabComments.create_date = std::chrono::system_clock::now(),
-                    tabComments.author = comment.author, tabComments.comment_for = comment.comment_for,
+                    tabComments.author = comment.author,
+                    tabComments.comment_for = comment.comment_for,
                     tabComments.rating = 0));
     }
 
     TabTags tabTags;
-    db(insert_into(tabTags)
-            .set(tabTags.title = "dota"));
+    db(insert_into(tabTags).set(tabTags.title = "dota"));
 
     TabTagTweet tabTagTweet;
     db(insert_into(tabTagTweet)
-            .set(tabTagTweet.tweetID = 2, tabTagTweet.tagID = 1));
-
+           .set(tabTagTweet.tweetID = 2, tabTagTweet.tagID = 1));
 
     /*db(insert_into(tabUsers).set(
         tabUsers.name = "twitter", tabUsers.username = "twitter",

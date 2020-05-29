@@ -45,8 +45,8 @@ std::string serialization::to_json(const model::Tweet& tweet) {
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
-    std::string time = date::format("%FT%TZ",
-                                    date::floor<std::chrono::seconds>(tweet.create_date));
+    std::string time = date::format(
+        "%FT%TZ", date::floor<std::chrono::seconds>(tweet.create_date));
 
     d.AddMember("id", tweet.id, allocator);
     d.AddMember("body", Value().SetString(StringRef(tweet.body.c_str())),
@@ -172,7 +172,6 @@ utils::Session serialization::from_json<utils::Session>(
     return utils::Session{document["user_id"].Get<PKey>()};
 }
 
-
 #include <iostream>
 template <>
 model::Tweet serialization::from_json<model::Tweet>(const std::string& json) {
@@ -184,8 +183,8 @@ model::Tweet serialization::from_json<model::Tweet>(const std::string& json) {
     in >> date::parse("%FT%TZ", tp);
 
     return model::Tweet{
-        document["id"].Get<PKey>(),       document["body"].GetString(),
-        document["author"].Get<PKey>(),   tp,
+        document["id"].Get<PKey>(),     document["body"].GetString(),
+        document["author"].Get<PKey>(), tp,
         document["rating"].Get<long>(), document["retweets"].Get<long>()};
 }
 

@@ -28,7 +28,8 @@ void UsersEndpoint::create(const Pistache::Rest::Request& request,
     auto username_optional = request.query().get("username");
     auto name_optional = request.query().get("name");
     auto password_optional = request.query().get("password");
-    if (username_optional.isEmpty() || name_optional.isEmpty() || password_optional.isEmpty()) {
+    if (username_optional.isEmpty() || name_optional.isEmpty() ||
+        password_optional.isEmpty()) {
         response.send(Pistache::Http::Code::Bad_Request,
                       "Not found one or more parameters");
         return;

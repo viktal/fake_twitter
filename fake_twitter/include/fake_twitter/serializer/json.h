@@ -5,15 +5,15 @@
 #include <rapidjson/rapidjson.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
-#include <chrono>
 #include <stdio.h>
 
+#include <chrono>
 #include <vector>
 
-#include "fake_twitter/model/TagTweet.h"
-#include "fake_twitter/model/Tag.h"
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/model/Followers.h"
+#include "fake_twitter/model/Tag.h"
+#include "fake_twitter/model/TagTweet.h"
 #include "fake_twitter/model/Tweet.h"
 #include "fake_twitter/model/User.h"
 #include "fake_twitter/utils.h"
