@@ -31,7 +31,7 @@ std::vector<WorkloadInfo> make_users(Http::Client& client, int N) {
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/users/create?";
     for (int i = 0; i < N; i++) {
-        auto to_insert = WorkloadInfo(std::to_string(i));
+        auto to_insert = WorkloadInfo(std::to_string(i + 1));
         auto posturl = url + "username=" + to_insert.user.username +
                        "&name=" + to_insert.user.name +
                        "&password=" + to_insert.password;
@@ -61,9 +61,8 @@ void do_auth(Http::Client& client, std::vector<WorkloadInfo>& credentials) {
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/users/auth?";
     for (auto i = 0; i < credentials.size(); i++) {
-        const auto& cred = credentials[i];
-        auto posturl = url + "username=" + cred.user.username +
-                       "&password=" + cred.password;
+        auto posturl = url + "username=" + credentials[i].user.username +
+                       "&password=" + credentials[i].password;
         auto response = client.post(posturl).send();
         response.then(
             [i, &credentials](Http::Response rsp) {

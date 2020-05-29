@@ -33,7 +33,7 @@ public:
         Port port(PORT);
         Address addr(ADDRESS, port);
 
-        auto opts = Http::Endpoint::options().threads(4).flags(
+        auto opts = Http::Endpoint::options().threads(1).flags(
             Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
 
         server = std::make_unique<RestServer>(addr, config);
@@ -41,7 +41,7 @@ public:
         server->serveThreaded();
 
         client = std::make_unique<Http::Client>();
-        auto client_opts = Http::Client::options().threads(4);
+        auto client_opts = Http::Client::options().threads(1);
         client->init(client_opts);
     }
 
