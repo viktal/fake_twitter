@@ -5,10 +5,9 @@
 #include <pistache/http.h>
 #include <pistache/router.h>
 
+#include "fake_twitter/model/User.h"
 #include "fake_twitter/serializer/json.h"
 #include "fake_twitter/utils.h"
-#include "fake_twitter/model/User.h"
-
 #include "httplib.h"
 
 class EndpointTest : public ::testing::Test {
@@ -36,7 +35,6 @@ protected:
     std::unique_ptr<httplib::Client> client;
     std::unique_ptr<Pistache::Http::Endpoint> endpoint;
 };
-
 
 httplib::Headers make_cookies(const fake_twitter::model::User& user) {
     auto json = fake_twitter::serialization::to_json(

@@ -17,7 +17,7 @@ struct UserCredentials {
         this->password = password;
     }
     model::User user = model::User();
-    std::vector <model::Tweet> tweets {};
+    std::vector<model::Tweet> tweets{};
     std::string password = "";
     Http::Cookie session = Http::Cookie("", "");
 };
@@ -60,7 +60,7 @@ void do_auth(Http::Client& client, std::vector<UserCredentials>& credentials) {
 
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/users/auth?";
-    for (auto & credential : credentials) {
+    for (auto& credential : credentials) {
         const auto& cred = credential;
         auto posturl = url + "username=" + cred.user.username +
                        "&password=" + cred.password;
@@ -126,7 +126,8 @@ void select_users(Http::Client& client,
     awaitall(responses);
 }
 
-void drop_users(Http::Client& client, const std::vector<UserCredentials>& credentials,
+void drop_users(Http::Client& client,
+                const std::vector<UserCredentials>& credentials,
                 bool expect_fail) {
     std::vector<Async::Promise<Http::Response>> responses;
     const std::string url =

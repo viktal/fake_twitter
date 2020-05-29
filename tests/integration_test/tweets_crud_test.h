@@ -80,17 +80,16 @@ void drop_tweets(Http::Client& client, std::vector<UserCredentials> credentials,
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/tweets/drop?";
 
-    for (const auto& cred: credentials) {
+    for (const auto& cred : credentials) {
         for (const auto& tweet : cred.tweets) {
             auto deleteurl = url + "id=" + std::to_string(tweet.id);
-            auto response =
-                client.del(deleteurl).cookie(cred.session).send();
+            auto response = client.del(deleteurl).cookie(cred.session).send();
             response.then(
                 [tweet, expect_fail](Http::Response rsp) {
-                  if (expect_fail)
-                      EXPECT_EQ(rsp.code(), Http::Code::Not_Found);
-                  else
-                      EXPECT_EQ(rsp.code(), Http::Code::Ok);
+                    if (expect_fail)
+                        EXPECT_EQ(rsp.code(), Http::Code::Not_Found);
+                    else
+                        EXPECT_EQ(rsp.code(), Http::Code::Ok);
                 },
                 onfail);
             responses.push_back(std::move(response));

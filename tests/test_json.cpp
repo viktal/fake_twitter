@@ -24,8 +24,7 @@ TEST(test_serialiser, json_tweet) {
 
     std::stringstream builder;
     builder << R"({"id":0,"body":"body","author":10,"create_date":")"
-            << date::format("%FT%TZ", time)
-            << R"(","retweets":3,"rating":2})";
+            << date::format("%FT%TZ", time) << R"(","retweets":3,"rating":2})";
     std::string tweet = serialization::to_json(fake_tweet);
 
     EXPECT_EQ(tweet, builder.str());
