@@ -13,22 +13,22 @@ TEST_F(test_fixture_restserver, test_many_users_create_show) {
     const int users = 200;
     const int per_user_max_tweets = 20;
 
-    auto credentials = make_users(*client, users);
-    do_auth(*client, credentials);
+    auto workload = make_users(*client, users);
+    do_auth(*client, workload);
 
-//    make_tweets(*client, credentials, per_user_max_tweets);
-//    select_tweets(*client, credentials, false);
-//    drop_tweets(*client, credentials, false);
+//    make_tweets(*client, workload, per_user_max_tweets);
+//    select_tweets(*client, workload, false);
+//    drop_tweets(*client, workload, false);
 //
 ////     can't select after drop or drop twice
-//    select_tweets(*client, credentials, true);
-//    drop_tweets(*client, credentials, true);
+//    select_tweets(*client, workload, true);
+//    drop_tweets(*client, workload, true);
 //
-//    update_users(*client, credentials);
-//    select_users(*client, credentials, false);
-//    drop_users(*client, credentials, false);
+//    update_users(*client, workload);
+//    select_users(*client, workload, false);
+//    drop_users(*client, workload, false);
 //
 ////     can't select after drop or drop twice
-//    select_users(*client, credentials, true);
-//    drop_users(*client, credentials, true);
+//    select_users(*client, workload, true);
+//    drop_users(*client, workload, true);
 }

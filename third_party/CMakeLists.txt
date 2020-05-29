@@ -24,7 +24,7 @@ add_subdirectory(date)
 execute_process(COMMAND sed -i "s/connection->is_valid()/true/g" ${CMAKE_CURRENT_SOURCE_DIR}/sqlpp11/include/sqlpp11/connection_pool.h)
 
 # sqlpp11 doesnt have proper cmake targets with public include folder(again)
-set(ENABLE_TESTS off)
+set(ENABLE_TESTS OFF CACHE BOOL)
 set(HinnantDate_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/date)
 add_subdirectory(sqlpp11)
 add_subdirectory(sqlpp11-connector-postgresql)

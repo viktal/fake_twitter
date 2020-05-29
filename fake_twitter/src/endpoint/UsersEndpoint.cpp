@@ -190,7 +190,7 @@ void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
     auto password_hash = utils::make_password_hash(user->salt, password);
     if (password_hash != user->password_hash) {
         response.send(Pistache::Http::Code::Bad_Request,
-                      "Invalid username or password");
+                      "Invalid username or password 2");
         return;
     }
 
