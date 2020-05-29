@@ -5,7 +5,7 @@ using namespace fake_twitter::repository;
 
 std::unique_ptr<model::Comment> CommentsRepository::get(PKey id) {
     auto query = (select(all_of(tab)).from(tab).where(tab.id == id));
-    auto result = pool->run(query);
+    auto result = pool->get_connection()(query);
     if (result.empty()) {
         return nullptr;
     }
@@ -20,7 +20,7 @@ std::unique_ptr<model::Comment> CommentsRepository::get(PKey id) {
 
 std::unique_ptr<model::Comment> CommentsRepository::create(
     const std::string& body, const int& author, const int& comment_for) {
-    auto newid = pool->run(insert_into(tab).set(
+    auto newid = pool->get_connection()(insert_into(tab).set(
         tab.body = body, tab.author = author, tab.comment_for = comment_for,
         tab.rating = 0, tab.create_date = std::chrono::system_clock::now()));
     std::unique_ptr<model::Comment> comment;
@@ -30,14 +30,14 @@ std::unique_ptr<model::Comment> CommentsRepository::create(
 }
 
 bool CommentsRepository::Delete(PKey id) {
-    return pool->run(remove_from(tab).where(tab.id == id));
+    return pool->get_connection()(remove_from(tab).where(tab.id == id));
 }
 
 std::unique_ptr<model::Comment> CommentsRepository::RaseLikes(PKey id) {
-    auto q = pool->run(
+    auto q = pool->get_connection()(
         update(tab).set(tab.rating = tab.rating + 1).where(tab.id == id));
     auto query = (select(all_of(tab)).from(tab).where(tab.id == id));
-    auto result = pool->run(query);
+    auto result = pool->get_connection()(query);
     if (result.empty()) {
         return nullptr;
     }

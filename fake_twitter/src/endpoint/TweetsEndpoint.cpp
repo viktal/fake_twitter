@@ -11,6 +11,7 @@ void TweetsEndpoint::show(const Pistache::Http::Request& request,
         return;
     }
     auto id = std::stol(id_optional.get());
+
     std::unique_ptr<model::Tweet> tweet = tweetsRepository->get(id);
     if (!tweet) {
         response.send(Pistache::Http::Code::Bad_Request,
@@ -31,6 +32,28 @@ void TweetsEndpoint::drop(const Pistache::Http::Request& request,
         return;
     }
     auto id = std::stol(id_optional.get());
+
+    std::unique_ptr<model::Tweet> tweet = tweetsRepository->get(id);
+
+    if (!tweet.get()) {
+        response.send(Pistache::Http::Code::Not_Found,
+                      "Not tweet with this id");
+        return;
+    }
+
+    if (!request.cookies().has("session")) {
+        response.send(Pistache::Http::Code::Unauthorized, "User unauthorized");
+        return;
+    }
+
+    auto session = serialization::from_json<utils::Session>(
+        request.cookies().get("session").value);
+
+    if (tweet->author != session.user_id) {
+        response.send(Pistache::Http::Code::Forbidden, "Not enough rights");
+        return;
+    }
+
     if (tweetsRepository->drop(id))
         response.send(Pistache::Http::Code::Ok, "Tweet deleted");
     else
@@ -49,10 +72,32 @@ void TweetsEndpoint::create(const Pistache::Http::Request& request,
     }
 
     auto author = std::stol(author_optional.get());
+
+    std::string body;
+
     rapidjson::Document document;
     document.Parse(body_json.c_str());
-    // нужна поверка на наличие body
-    auto body = std::string(document["body"].GetString());
+
+    if (document.HasParseError()) {
+        response.send(Pistache::Http::Code::Bad_Request,
+                      "Cannot create empty tweet");
+        return;
+    }
+    body = std::string(document["body"].GetString());
+
+    if (!request.cookies().has("session")) {
+        response.send(Pistache::Http::Code::Unauthorized,
+                      "User is unauthorized");
+        return;
+    }
+
+    auto session = serialization::from_json<utils::Session>(
+        request.cookies().get("session").value);
+
+    if (author != session.user_id) {
+        response.send(Pistache::Http::Code::Forbidden, "Not enough rights");
+        return;
+    }
 
     auto newTwit = tweetsRepository->create(author, body);
 

@@ -3,10 +3,10 @@
 #include <pistache/router.h>
 #include <sqlpp11/postgresql/postgresql.h>
 
-#include "fake_twitter/endpoint/TagTweetEndpoint.h"
-#include "fake_twitter/endpoint/TagsEndpoint.h"
 #include "fake_twitter/endpoint/CommentsEndpoint.h"
 #include "fake_twitter/endpoint/NewsFeedEndpoint.h"
+#include "fake_twitter/endpoint/TagTweetEndpoint.h"
+#include "fake_twitter/endpoint/TagsEndpoint.h"
 #include "fake_twitter/endpoint/TweetsEndpoint.h"
 #include "fake_twitter/endpoint/UsersEndpoint.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"

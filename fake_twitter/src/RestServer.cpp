@@ -11,6 +11,8 @@ void RestServer::setupRoutes() {
         Routes::bind(&endpoints::UsersEndpoint::show, usersEndpoint));
     Post(router, "/0.0/users/create",
          Routes::bind(&endpoints::UsersEndpoint::create, usersEndpoint));
+    Post(router, "/0.0/users/auth",
+         Routes::bind(&endpoints::UsersEndpoint::authorization, usersEndpoint));
     Put(router, "/0.0/users/update",
         Routes::bind(&endpoints::UsersEndpoint::update, usersEndpoint));
     Delete(router, "/0.0/users/drop",
@@ -71,10 +73,8 @@ RestServer::RestServer(Address addr,
 
     auto config_ptr =
         std::make_shared<sqlpp::postgresql::connection_config>(config);
-    auto connection =
-        std::make_unique<sqlpp::postgresql::connection>(config_ptr);
-    auto connectionsPool =
-        std::make_shared<repository::DBConnectionsPool>(std::move(connection));
+    auto connectionsPool = std::make_shared<repository::DBConnectionsPool>(
+        std::move(config_ptr), 10);
 
     commentsRepository =
         std::make_unique<repository::CommentsRepository>(connectionsPool);
@@ -92,8 +92,7 @@ RestServer::RestServer(Address addr,
 
     tagsRepository =
         std::make_unique<repository::TagsRepository>(connectionsPool);
-    tagsEndpoint =
-        std::make_shared<endpoints::TagsEndpoint>(tagsRepository);
+    tagsEndpoint = std::make_shared<endpoints::TagsEndpoint>(tagsRepository);
 
     tagtweetRepository =
         std::make_unique<repository::TagTweetRepository>(connectionsPool);

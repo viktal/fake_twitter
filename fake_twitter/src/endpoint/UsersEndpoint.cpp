@@ -27,15 +27,18 @@ void UsersEndpoint::create(const Pistache::Rest::Request& request,
                            Pistache::Http::ResponseWriter response) {
     auto username_optional = request.query().get("username");
     auto name_optional = request.query().get("name");
-    if (username_optional.isEmpty() || name_optional.isEmpty()) {
+    auto password_optional = request.query().get("password");
+    if (username_optional.isEmpty() || name_optional.isEmpty() ||
+        password_optional.isEmpty()) {
         response.send(Pistache::Http::Code::Bad_Request,
                       "Not found one or more parameters");
         return;
     }
     auto username = std::string(username_optional.get());
     auto name = std::string(name_optional.get());
+    auto password = std::string(password_optional.get());
 
-    auto newUser = usersRepository->create(name, username);
+    auto newUser = usersRepository->create(name, username, password);
 
     response.headers().add<Pistache::Http::Header::ContentType>(
         MIME(Application, Json));
@@ -51,18 +54,27 @@ void UsersEndpoint::update(const Pistache::Rest::Request& request,
     }
     auto id = std::stol(id_optional.get());
 
+    if (!request.cookies().has("session")) {
+        response.send(Pistache::Http::Code::Unauthorized, "User unauthorized");
+        return;
+    }
+
+    auto session = serialization::from_json<utils::Session>(
+        request.cookies().get("session").value);
+
+    if (id != session.user_id) {
+        response.send(Pistache::Http::Code::Forbidden, "Not enough rights");
+        return;
+    }
+
     auto name_optional = request.query().get("name");
-    auto avatar_optional = request.query().get("avatar");
 
     std::optional<std::string> name;
-    std::optional<std::string> avatar;
 
     if (!name_optional.isEmpty())
         name = std::optional<std::string>(name_optional.get());
-    if (!avatar_optional.isEmpty())
-        avatar = std::optional<std::string>(avatar_optional.get());
 
-    usersRepository->update(id, name, avatar);
+    usersRepository->update(id, name);
     response.send(Pistache::Http::Code::Ok, "User updated");
 }
 
@@ -74,6 +86,20 @@ void UsersEndpoint::drop(const Pistache::Rest::Request& request,
         return;
     }
     auto id = std::stol(id_optional.get());
+
+    if (!request.cookies().has("session")) {
+        response.send(Pistache::Http::Code::Unauthorized, "User unauthorized");
+        return;
+    }
+
+    auto session = serialization::from_json<utils::Session>(
+        request.cookies().get("session").value);
+
+    if (id != session.user_id) {
+        response.send(Pistache::Http::Code::Forbidden, "Not enough rights");
+        return;
+    }
+
     if (usersRepository->drop(id))
         response.send(Pistache::Http::Code::Ok, "User deleted");
     else
@@ -139,4 +165,36 @@ void UsersEndpoint::unfollow(const Pistache::Rest::Request& request,
         response.send(Pistache::Http::Code::Ok);
     else
         response.send(Pistache::Http::Code::Bad_Request);
+}
+
+void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
+                                  Pistache::Http::ResponseWriter response) {
+    auto username_optional = request.query().get("username");
+    auto password_optional = request.query().get("password");
+    if (username_optional.isEmpty() || password_optional.isEmpty()) {
+        response.send(Pistache::Http::Code::Bad_Request,
+                      "Not found one or more parameters");
+        return;
+    }
+    auto username = std::string(username_optional.get());
+    auto password = std::string(password_optional.get());
+
+    auto user = usersRepository->get(username);
+
+    if (!user) {
+        response.send(Pistache::Http::Code::Bad_Request,
+                      "Invalid username or password");
+        return;
+    }
+    auto password_hash = utils::make_password_hash(user->salt, password);
+    if (password_hash != user->password_hash) {
+        response.send(Pistache::Http::Code::Bad_Request,
+                      "Invalid username or password");
+        return;
+    }
+
+    auto session = serialization::to_json(utils::Session{user->id});
+    response.cookies().add(Pistache::Http::Cookie("session", session));
+
+    response.send(Pistache::Http::Code::Ok, "user is authorized");
 }
