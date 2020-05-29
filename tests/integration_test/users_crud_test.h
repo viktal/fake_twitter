@@ -60,16 +60,16 @@ void do_auth(Http::Client& client, std::vector<UserCredentials>& credentials) {
 
     const std::string url =
         "http://" + ADDRESS + ":" + std::to_string(PORT) + "/0.0/users/auth?";
-    for (auto& credential : credentials) {
-        const auto& cred = credential;
+    for (auto i = 0; i < credentials.size(); i++) {
+        const auto& cred = credentials[i];
         auto posturl = url + "username=" + cred.user.username +
                        "&password=" + cred.password;
         auto response = client.post(posturl).send();
         response.then(
-            [&credential, &credentials](Http::Response rsp) {
+            [i, &credentials](Http::Response rsp) {
                 EXPECT_EQ(rsp.code(), Http::Code::Ok);
                 EXPECT_TRUE(rsp.cookies().has("session"));
-                credential.session = rsp.cookies().get("session");
+                credentials[i].session = rsp.cookies().get("session");
             },
             onfail);
         responses.push_back(std::move(response));

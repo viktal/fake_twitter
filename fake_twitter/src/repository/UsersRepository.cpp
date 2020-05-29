@@ -70,7 +70,6 @@ bool UsersRepository::drop(PKey id) {
     auto result = pool->get_connection()(select(tabFollower.addresser)
                                              .from(tabFollower)
                                              .where(tabFollower.author == id));
-    std::cout << "gg" << result.size();
     return pool->get_connection()(
         remove_from(tabUsers).where(tabUsers.id == id));
 }
