@@ -35,7 +35,7 @@ public:
     virtual bool drop(PKey id);
 
     virtual void update(PKey id, std::optional<std::string> name);
-    virtual std::unique_ptr<model::Followers> getfollow(PKey id);
+    virtual std::vector<model::User_pr> getfollow(PKey id);
 
     virtual bool follow(PKey author, PKey addresser);
 

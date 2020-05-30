@@ -26,6 +26,21 @@ std::string serialization::to_json(const model::User& user) {
     return buffer.GetString();
 }
 
+std::string serialization::to_json(const model::User_pr& user) {
+    Document d;
+    d.SetObject();
+    rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+
+    d.AddMember("id", user.id, allocator);
+    d.AddMember("name", Value().SetString(StringRef(user.name.c_str())),allocator);
+
+    StringBuffer buffer;
+    Writer<StringBuffer> writer(buffer);
+    d.Accept(writer);
+
+    return buffer.GetString();
+}
+
 std::string serialization::to_json(const utils::Session& session) {
     Document d;
     d.SetObject();
@@ -86,6 +101,19 @@ std::string serialization::to_json(std::vector<model::Tweet> tweetVector) {
         str = str + serialization::to_json(tweetVector.back());
         if (tweetVector.size() > 1) {
             str = str + ",";
+        }
+        tweetVector.pop_back();
+    }
+    str = str + "]}";
+    return str;
+}
+
+std::string serialization::to_json(std::vector<model::User_pr> tweetVector) {
+    std::string str = "{\"friends\" :[";  // + "," + "]}";
+    while (!tweetVector.empty()) {
+        str += serialization::to_json(tweetVector.back());
+        if (tweetVector.size() > 1) {
+            str += ",";
         }
         tweetVector.pop_back();
     }

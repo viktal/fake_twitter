@@ -14,6 +14,11 @@ struct User {
     size_t friends_count = 0;
 };
 
+struct User_pr{
+    PKey id;
+    std::string name;
+};
+
 bool operator==(const User& u1, const User& u2);
 
 }  // namespace fake_twitter::model

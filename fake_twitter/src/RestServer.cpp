@@ -30,7 +30,7 @@ void RestServer::setupRoutes() {
     Delete(router, "/0.0/users/unfollow",
            Routes::bind(&endpoints::UsersEndpoint::unfollow, usersEndpoint));
     Get(router, "/0.0/followers/show",
-        Routes::bind(&endpoints::UsersEndpoint::showFollowTable,
+        Routes::bind(&endpoints::UsersEndpoint::showFollow,
                      usersEndpoint));
 
     Get(router, "/0.0/comments/show.json",
