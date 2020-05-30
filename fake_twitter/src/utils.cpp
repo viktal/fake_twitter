@@ -2,9 +2,9 @@
 
 using namespace fake_twitter::utils;
 /* submodule cryptopp
-#include "sha.h"
-#include "filters.h"
 #include "base64.h"
+#include "filters.h"
+#include "sha.h"
 
 std::string SHA256HashString(std::string aString){
     std::string digest;
@@ -12,8 +12,8 @@ std::string SHA256HashString(std::string aString){
 
     CryptoPP::StringSource foo(aString, true,
                                new CryptoPP::HashFilter(hash,
-                                                        new CryptoPP::Base64Encoder (
-                                                                new CryptoPP::StringSink(digest))));
+                                                        new
+CryptoPP::Base64Encoder ( new CryptoPP::StringSink(digest))));
 
     return digest;
 }
@@ -45,5 +45,8 @@ fake_twitter::PasswordHash fake_twitter::utils::make_password_hash(
     // TODO: proper hashing. std::hash is not consistent between runs
     //    return std::hash<std::string>{}(salt + password);
     auto tohash = salt + password;
-    return std::accumulate(tohash.begin(), tohash.end(), 0);
+    long res = 0;
+    int p = 71;
+    for (int a : tohash) res = ((res + a) * p) % LONG_MAX;
+    return res;
 }
