@@ -30,7 +30,7 @@ public:
     void drop(const Pistache::Rest::Request& request,
               Pistache::Http::ResponseWriter response);
 
-    void showFollowTable(const Pistache::Rest::Request& request,
+    void showFollow(const Pistache::Rest::Request& request,
                          Pistache::Http::ResponseWriter response);
 
     void follow(const Pistache::Rest::Request& request,
