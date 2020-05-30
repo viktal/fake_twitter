@@ -11,51 +11,57 @@ std::unique_ptr<model::Tweet> TweetsRepository::get(PKey id) {
     auto query =
         select(all_of(tabTweets)).from(tabTweets).where(tabTweets.id == id);
 
-    auto result = pool->run(query);
+    auto result = pool->get_connection()(query);
     if (result.empty()) {
         return nullptr;
     }
 
     auto& first = result.front();
     std::unique_ptr<model::Tweet> tweet;
-    tweet = std::make_unique<model::Tweet>(model::Tweet{
-        first.id.value(), first.body.value(), first.author.value()});
+    tweet = std::make_unique<model::Tweet>(
+        model::Tweet{first.id.value(), first.body.value(), first.author.value(),
+                     std::chrono::time_point_cast<std::chrono::seconds>(
+                         first.create_date.value()),
+                     first.rating.value(), first.retweets.value()});
 
     return tweet;
 }
 
 bool TweetsRepository::drop(PKey id) {
-    return pool->run(remove_from(tabTweets).where(tabTweets.id == id));
+    return pool->get_connection()(
+        remove_from(tabTweets).where(tabTweets.id == id));
 }
 
 model::Tweet TweetsRepository::create(const PKey& author,
                                       const std::string& body) {
-    auto newid = pool->run(
+    auto time = std::chrono::time_point_cast<std::chrono::seconds>(
+        std::chrono::system_clock::now());
+    auto newid = pool->get_connection()(
         sqlpp::postgresql::insert_into(tabTweets)
             .set(tabTweets.author = author, tabTweets.body = body,
-                 tabTweets.create_date = std::chrono::system_clock::now(),
-                 tabTweets.retweets = 0, tabTweets.rating = 0)
+                 tabTweets.create_date = time, tabTweets.retweets = 0,
+                 tabTweets.rating = 0)
             .returning(tabTweets.id));
 
     return std::move(model::Tweet{PKey(newid.front().id.value()), body,
-                                  PKey(author), "12.12.12", 0, 0});
+                                  PKey(author), time, 0, 0});
 }
 
 bool TweetsRepository::like(PKey author, PKey twit) {
-    auto result = pool->run(
+    auto result = pool->get_connection()(
         select(all_of(tabLikes))
             .from(tabLikes)
             .where(tabLikes.author == author && tabLikes.twit == twit));
     if (result.empty()) {
-        auto dummy2 =
-            pool->run(sqlpp::update(tabTweets)
-                          .set(tabTweets.rating = tabTweets.rating + 1)
-                          .where(tabTweets.id == twit));
+        auto dummy2 = pool->get_connection()(
+            sqlpp::update(tabTweets)
+                .set(tabTweets.rating = tabTweets.rating + 1)
+                .where(tabTweets.id == twit));
         if (!dummy2) {
             return false;
         }
 
-        auto dummy = pool->run(insert_into(tabLikes).set(
+        auto dummy = pool->get_connection()(insert_into(tabLikes).set(
             tabLikes.author = author, tabLikes.twit = twit));
         return true;
     }
@@ -63,15 +69,17 @@ bool TweetsRepository::like(PKey author, PKey twit) {
 }
 
 bool TweetsRepository::unlike(PKey author, PKey twit) {
-    auto result = pool->run(remove_from(tabLikes).where(
+    auto result = pool->get_connection()(remove_from(tabLikes).where(
         tabLikes.author == author && tabLikes.twit == twit));
     if (!result) return false;
-    auto dummy = pool->run(sqlpp::update(tabTweets)
-                               .set(tabTweets.rating = tabTweets.rating - 1)
-                               .where(tabTweets.id == twit));
+    auto dummy =
+        pool->get_connection()(sqlpp::update(tabTweets)
+                                   .set(tabTweets.rating = tabTweets.rating - 1)
+                                   .where(tabTweets.id == twit));
 
-    dummy = pool->run(sqlpp::update(tabTweets)
-                          .set(tabTweets.rating = tabTweets.rating - 1)
-                          .where(tabTweets.id == author));
+    dummy =
+        pool->get_connection()(sqlpp::update(tabTweets)
+                                   .set(tabTweets.rating = tabTweets.rating - 1)
+                                   .where(tabTweets.id == author));
     return true;
 }

@@ -12,12 +12,12 @@ public:
     MOCK_METHOD(std::unique_ptr<fake_twitter::model::User>, get,
                 (fake_twitter::PKey id), (override));
     MOCK_METHOD(fake_twitter::model::User, create,
-                (const std::string& name, const std::string& username),
+                (const std::string& name, const std::string& username,
+                 const std::string& password),
                 (override));
     MOCK_METHOD(bool, drop, (fake_twitter::PKey id), (override));
     MOCK_METHOD(void, update,
-                (fake_twitter::PKey id, std::optional<std::string> name,
-                 std::optional<std::string> avatar),
+                (fake_twitter::PKey id, std::optional<std::string> name),
                 (override));
     MOCK_METHOD(std::unique_ptr<fake_twitter::model::Followers>, getfollow,
                 (fake_twitter::PKey id), (override));

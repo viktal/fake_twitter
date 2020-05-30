@@ -55,12 +55,21 @@ TEST_F(TweetsEndpointTest, Create) {
         Rest::Routes::bind(&TweetsEndpoint::create, tweetsEndpoint));
     serveThreaded();
 
-    model::Tweet tweet = {0, "body", 1, "12.12.12", 0, 0};
+    auto fakeuser = model::User{1, "name", "username", 123, "salt", 0, 0};
+    auto headers = make_cookies(fakeuser);
+
+    model::Tweet tweet = {0,
+                          "body",
+                          1,
+                          std::chrono::time_point_cast<std::chrono::seconds>(
+                              std::chrono::system_clock::now()),
+                          0,
+                          0};
     EXPECT_CALL(*mockTweetsRepository, create(1, "body"))
         .WillOnce(Return(tweet));
 
-    auto response = client->Post("/create?author=1", "{\"body\":\"body\"}",
-                                 "application/json");
+    auto response = client->Post("/create?author=1", headers,
+                                 "{\"body\":\"body\"}", "application/json");
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
     ASSERT_EQ(
         fake_twitter::serialization::from_json<model::Tweet>(response->body),
@@ -68,18 +77,55 @@ TEST_F(TweetsEndpointTest, Create) {
 
     response = client->Post("/create", {});
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
+
+    response = client->Post("/create?author=5", headers, "{\"body\":\"body\"}",
+                            "application/json");
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Forbidden);
 }
+
 TEST_F(TweetsEndpointTest, Drop) {
     Rest::Routes::Delete(
         router, "/drop",
         Rest::Routes::bind(&TweetsEndpoint::drop, tweetsEndpoint));
     serveThreaded();
 
-    EXPECT_CALL(*mockTweetsRepository, drop(1)).WillOnce(Return(true));
-    auto response = client->Delete("/drop?id=1");
+    auto fakeuser = model::User{1, "name", "username", 123, "salt", 0, 0};
+    auto headers = make_cookies(fakeuser);
+    auto tweet =
+        model::Tweet{0,
+                     "body",
+                     1,
+                     std::chrono::time_point_cast<std::chrono::seconds>(
+                         std::chrono::system_clock::now()),
+                     0,
+                     0};
+    EXPECT_CALL(*mockTweetsRepository, get(0)).WillOnce([&]() {
+        return std::make_unique<model::Tweet>(tweet);
+    });
+    EXPECT_CALL(*mockTweetsRepository, drop(0)).WillOnce(Return(true));
+
+    auto response = client->Delete("/drop?id=0", headers);
     ASSERT_EQ(Http::Code(response->status), Http::Code::Ok);
 
-    EXPECT_CALL(*mockTweetsRepository, drop(1)).WillOnce(Return(false));
-    response = client->Delete("/drop?id=1");
+    EXPECT_CALL(*mockTweetsRepository, get(0)).WillOnce([&]() {
+        return std::make_unique<model::Tweet>(tweet);
+    });
+    EXPECT_CALL(*mockTweetsRepository, drop(0)).WillOnce(Return(false));
+    response = client->Delete("/drop?id=0", headers);
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
+
+    auto tweet2 =
+        model::Tweet{0,
+                     "body",
+                     2,
+                     std::chrono::time_point_cast<std::chrono::seconds>(
+                         std::chrono::system_clock::now()),
+                     0,
+                     0};
+    EXPECT_CALL(*mockTweetsRepository, get(0)).WillOnce([&]() {
+        return std::make_unique<model::Tweet>(tweet2);
+    });
+    EXPECT_CALL(*mockTweetsRepository, drop(0)).Times(0);
+    response = client->Delete("/drop?id=0", headers);
+    ASSERT_EQ(Http::Code(response->status), Http::Code::Forbidden);
 }

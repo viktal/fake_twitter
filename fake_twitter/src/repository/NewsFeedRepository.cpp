@@ -7,7 +7,7 @@ std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
                              .from(tabFollower)
                              .where(tabFollower.author == id);
     std::vector<model::Tweet> tweet_vector;
-    auto resultFollower = pool->run(queryFollower);
+    auto resultFollower = pool->get_connection()(queryFollower);
     if (resultFollower.empty()) {
         return tweet_vector;
     }
@@ -18,7 +18,7 @@ std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
                 .from(tabTweets)
                 .where(tabTweets.author == firstFollower.addresser.value());
 
-        auto resultTweet = pool->run(queryTweet);
+        auto resultTweet = pool->get_connection()(queryTweet);
         while (!resultTweet.empty()) {
             auto& firstTweet = resultTweet.front();
             model::Tweet t = {firstTweet.id.value(), firstTweet.body.value(),
@@ -40,7 +40,7 @@ std::vector<model::Tweet> NewsFeedRepository::getUserBoard(PKey id) {
     std::vector<model::Tweet> tweet_vector;
     auto queryTweet =
         select(all_of(tabTweets)).from(tabTweets).where(tabTweets.author == id);
-    auto resultTweet = pool->run(queryTweet);
+    auto resultTweet = pool->get_connection()(queryTweet);
     while (!resultTweet.empty()) {
         auto& firstTweet = resultTweet.front();
         model::Tweet t = {firstTweet.id.value(), firstTweet.body.value(),

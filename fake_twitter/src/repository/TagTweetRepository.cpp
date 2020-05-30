@@ -3,16 +3,17 @@
 using namespace fake_twitter;
 using fake_twitter::repository::TagTweetRepository;
 
-
-TagTweetRepository::TagTweetRepository(std::shared_ptr<DBConnectionsPool> pool) {
+TagTweetRepository::TagTweetRepository(
+    std::shared_ptr<DBConnectionsPool> pool) {
     this->pool = std::move(pool);
 }
 
 std::unique_ptr<model::TagTweet> TagTweetRepository::get(PKey id) {
-    auto query =
-        select(all_of(tabTagTweet)).from(tabTagTweet).where(tabTagTweet.id == id);
+    auto query = select(all_of(tabTagTweet))
+                     .from(tabTagTweet)
+                     .where(tabTagTweet.id == id);
 
-    auto result = pool->run(query);
+    auto result = pool->get_connection()(query);
     if (result.empty()) {
         return nullptr;
     }
@@ -25,11 +26,13 @@ std::unique_ptr<model::TagTweet> TagTweetRepository::get(PKey id) {
     return tagtweet;
 }
 
-model::TagTweet TagTweetRepository::create(const PKey& tweetID, const PKey& tagID) {
-    auto newid = pool->run(
+model::TagTweet TagTweetRepository::create(const PKey& tweetID,
+                                           const PKey& tagID) {
+    auto newid = pool->get_connection()(
         sqlpp::postgresql::insert_into(tabTagTweet)
             .set(tabTagTweet.tweetID = tweetID, tabTagTweet.tagID = tagID)
             .returning(tabTagTweet.id));
 
-    return std::move(model::TagTweet{PKey(newid.front().id.value()), tweetID, tagID});
+    return std::move(
+        model::TagTweet{PKey(newid.front().id.value()), tweetID, tagID});
 }

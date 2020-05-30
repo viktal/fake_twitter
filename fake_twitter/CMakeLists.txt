@@ -1,6 +1,5 @@
 set(SOURCES
         src/serializer/json.cpp
-        src/repository/DBConnectionPool.cpp
         src/repository/TweetsRepository.cpp
         src/repository/UsersRepository.cpp
         src/repository/CommentsRepository.cpp
@@ -16,12 +15,13 @@ set(SOURCES
         src/model/User.cpp
         src/model/Tweet.cpp
         src/RestServer.cpp
+        src/utils.cpp
         )
 
 add_library(fake_twitter STATIC ${SOURCES})
 target_include_directories(fake_twitter PUBLIC include)
 target_compile_features(fake_twitter PRIVATE cxx_std_17)
-target_link_libraries(fake_twitter PUBLIC mypistache rapidjson sqlpp11 my-sqlpp11-connector-postgresql)
+target_link_libraries(fake_twitter PUBLIC mypistache rapidjson sqlpp11 my-sqlpp11-connector-postgresql date)
 
 add_executable(app src/app.cpp)
 target_compile_features(app PRIVATE cxx_std_17)

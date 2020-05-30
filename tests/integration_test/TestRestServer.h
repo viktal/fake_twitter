@@ -15,16 +15,19 @@ class test_fixture_restserver : public ::testing::Test {
 public:
     std::unique_ptr<RestServer> server;
     std::unique_ptr<Http::Client> client;
+    sqlpp::postgresql::connection_config config;
 
     void SetUp() override {
-        sqlpp::postgresql::connection_config config;
         config.host = "127.0.0.1";
         config.user = "twituser";
         config.password = "123";
         config.dbname = TMP_DB_NAME;
         config.debug = false;
 
-        fake::postgresql_tables(
+        fake::drop_postgresql_tables(
+            std::make_shared<sqlpp::postgresql::connection_config>(config));
+
+        fake::create_postgresql_tables(
             std::make_shared<sqlpp::postgresql::connection_config>(config));
 
         Port port(PORT);
@@ -38,11 +41,13 @@ public:
         server->serveThreaded();
 
         client = std::make_unique<Http::Client>();
-        auto client_opts = Http::Client::options().threads(4);
+        auto client_opts = Http::Client::options().threads(1);
         client->init(client_opts);
     }
 
     void TearDown() override {
+        fake::drop_postgresql_tables(
+            std::make_shared<sqlpp::postgresql::connection_config>(config));
         server->shutdown();
         client->shutdown();
         if (std::filesystem::exists(TMP_DB_NAME))

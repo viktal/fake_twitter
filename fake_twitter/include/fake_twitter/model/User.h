@@ -5,11 +5,11 @@
 namespace fake_twitter::model {
 
 struct User {
-    const PKey id;
+    PKey id;
     std::string name;
     std::string username;
     PasswordHash password_hash;
-    Avatar avatar = "/path/";
+    std::string salt;
     size_t followers_count = 0;
     size_t friends_count = 0;
 };

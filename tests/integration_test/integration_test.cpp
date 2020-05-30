@@ -10,23 +10,25 @@ using namespace Pistache;
 using namespace fake_twitter;
 
 TEST_F(test_fixture_restserver, test_many_users_create_show) {
-    const int N = 20;
+    const int users = 200;
+    const int per_user_max_tweets = 20;
 
-    auto users = make_users(*client, N);
+    auto workload = make_users(*client, users);
+    do_auth(*client, workload);
 
-    auto tweets = make_tweets(*client, users, N);
-    select_tweets(*client, tweets, false);
-    drop_tweets(*client, tweets, false);
+    make_tweets(*client, workload, per_user_max_tweets);
+    select_tweets(*client, workload, false);
+    drop_tweets(*client, workload, false);
 
-    // can't select after drop or drop twice
-    select_tweets(*client, tweets, true);
-    drop_tweets(*client, tweets, true);
+    //     can't select after drop or drop twice
+    select_tweets(*client, workload, true);
+    drop_tweets(*client, workload, true);
 
-    update_users(*client, users);
-    select_users(*client, users, false);
-    drop_users(*client, users, false);
+    update_users(*client, workload);
+    select_users(*client, workload, false);
+    drop_users(*client, workload, false);
 
-    // can't select after drop or drop twice
-    select_users(*client, users, true);
-    drop_users(*client, users, true);
+    //     can't select after drop or drop twice
+    select_users(*client, workload, true);
+    drop_users(*client, workload, true);
 }
