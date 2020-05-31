@@ -3,7 +3,7 @@
 using namespace fake_twitter;
 using namespace fake_twitter::endpoints;
 
-void UsersEndpoint::show(const Pistache::Rest::Request& request,
+void UsersEndpoint::show(const Pistache::Rest::Request &request,
                          Pistache::Http::ResponseWriter response) {
     auto id_optional = request.query().get("id");
     if (id_optional.isEmpty()) {
@@ -18,12 +18,12 @@ void UsersEndpoint::show(const Pistache::Rest::Request& request,
         return;
     } else {
         response.headers().add<Pistache::Http::Header::ContentType>(
-            MIME(Application, Json));
+                MIME(Application, Json));
         response.send(Pistache::Http::Code::Ok, serialization::to_json(*user));
     }
 }
 
-void UsersEndpoint::create(const Pistache::Rest::Request& request,
+void UsersEndpoint::create(const Pistache::Rest::Request &request,
                            Pistache::Http::ResponseWriter response) {
     auto username_optional = request.query().get("username");
     auto name_optional = request.query().get("name");
@@ -41,11 +41,11 @@ void UsersEndpoint::create(const Pistache::Rest::Request& request,
     auto newUser = usersRepository->create(name, username, password);
 
     response.headers().add<Pistache::Http::Header::ContentType>(
-        MIME(Application, Json));
+            MIME(Application, Json));
     response.send(Pistache::Http::Code::Ok, serialization::to_json(newUser));
 }
 
-void UsersEndpoint::update(const Pistache::Rest::Request& request,
+void UsersEndpoint::update(const Pistache::Rest::Request &request,
                            Pistache::Http::ResponseWriter response) {
     auto id_optional = request.query().get("id");
     if (id_optional.isEmpty()) {
@@ -60,7 +60,7 @@ void UsersEndpoint::update(const Pistache::Rest::Request& request,
     }
 
     auto session = serialization::from_json<utils::Session>(
-        request.cookies().get("session").value);
+            request.cookies().get("session").value);
 
     if (id != session.user_id) {
         response.send(Pistache::Http::Code::Forbidden, "Not enough rights");
@@ -78,7 +78,7 @@ void UsersEndpoint::update(const Pistache::Rest::Request& request,
     response.send(Pistache::Http::Code::Ok, "User updated");
 }
 
-void UsersEndpoint::drop(const Pistache::Rest::Request& request,
+void UsersEndpoint::drop(const Pistache::Rest::Request &request,
                          Pistache::Http::ResponseWriter response) {
     auto id_optional = request.query().get("id");
     if (id_optional.isEmpty()) {
@@ -93,7 +93,7 @@ void UsersEndpoint::drop(const Pistache::Rest::Request& request,
     }
 
     auto session = serialization::from_json<utils::Session>(
-        request.cookies().get("session").value);
+            request.cookies().get("session").value);
 
     if (id != session.user_id) {
         response.send(Pistache::Http::Code::Forbidden, "Not enough rights");
@@ -106,8 +106,8 @@ void UsersEndpoint::drop(const Pistache::Rest::Request& request,
         response.send(Pistache::Http::Code::Bad_Request, "Cannot delete user");
 }
 
-void UsersEndpoint::showFollowTable(const Pistache::Rest::Request& request,
-                                    Pistache::Http::ResponseWriter response) {
+void UsersEndpoint::showFollow(const Pistache::Rest::Request &request,
+                               Pistache::Http::ResponseWriter response) {
     auto id_optional = request.query().get("id");
     if (id_optional.isEmpty()) {
         response.send(Pistache::Http::Code::Bad_Request,
@@ -115,21 +115,16 @@ void UsersEndpoint::showFollowTable(const Pistache::Rest::Request& request,
         return;
     }
     auto id = std::stol(id_optional.get());
-    std::unique_ptr<model::Followers> followers =
-        usersRepository->getfollow(id);
-    if (!followers) {
-        response.send(Pistache::Http::Code::Bad_Request,
-                      "No user with this id");
-        return;
-    } else {
-        response.headers().add<Pistache::Http::Header::ContentType>(
+    std::vector<model::User_pr> followers =
+            usersRepository->getfollow(id);
+
+    response.headers().add<Pistache::Http::Header::ContentType>(
             MIME(Application, Json));
-        response.send(Pistache::Http::Code::Ok,
-                      serialization::to_json(*followers));
-    }
+    response.send(Pistache::Http::Code::Ok,
+                  serialization::to_json(followers));
 }
 
-void UsersEndpoint::follow(const Pistache::Rest::Request& request,
+void UsersEndpoint::follow(const Pistache::Rest::Request &request,
                            Pistache::Http::ResponseWriter response) {
     auto author_row = request.query().get("author");
     auto addresser_row = request.query().get("addresser");
@@ -149,7 +144,7 @@ void UsersEndpoint::follow(const Pistache::Rest::Request& request,
         response.send(Pistache::Http::Code::Bad_Request);
 }
 
-void UsersEndpoint::unfollow(const Pistache::Rest::Request& request,
+void UsersEndpoint::unfollow(const Pistache::Rest::Request &request,
                              Pistache::Http::ResponseWriter response) {
     auto author_row = request.query().get("author");
     auto addresser_row = request.query().get("addresser");
@@ -167,7 +162,7 @@ void UsersEndpoint::unfollow(const Pistache::Rest::Request& request,
         response.send(Pistache::Http::Code::Bad_Request);
 }
 
-void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
+void UsersEndpoint::authorization(const Pistache::Rest::Request &request,
                                   Pistache::Http::ResponseWriter response) {
     auto username_optional = request.query().get("username");
     auto password_optional = request.query().get("password");
