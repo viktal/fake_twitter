@@ -10,7 +10,7 @@ using namespace Pistache;
 using namespace fake_twitter;
 
 TEST_F(test_fixture_restserver, test_many_users_create_show) {
-    const int users = 200;
+    const int users = 20;
     const int per_user_max_tweets = 20;
 
     auto workload = make_users(*client, users);

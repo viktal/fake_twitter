@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FakeTwitter</title>
+</head>
+<body>
+<div id="main">
+    Username: <input type="text" id="username" size="20"><br>
+    Password: <input type="text" id="password" size="20"><br>
+    <button id="submit">Login</button>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script>
+    var $main = $('#main');
+
+    $main.on('click', '#submit', function () {
+        var username = $(`#username`).val();
+        var password = $('#password').val();
+
+        $.ajax({
+            url: `/0.0/users/auth?username=${username}&password=${password}`,
+            type: 'POST',
+            error: function () {
+                alert("No user with this login/password");
+            }
+        }).then(function (data) {
+            return $.ajax({
+                url: '/0.0/newsfeed/show',
+                type: 'GET',
+                error: function () {
+                    alert(`Failed to fetch news feed for user ${username}`);
+                }
+            });
+        }).then(function (data) {
+            $main.empty();
+            console.log(data);
+            data["tweets"].forEach(function (tweet, index) {
+                var body = `
+                <div>
+                Author: ${tweet.author}(rating ${tweet.rating}, retweered ${tweet.retweets})<br>
+                    Created at: ${tweet.create_date}<br>
+                    Body: ${tweet.body}</p>
+                </div> <br>
+            `;
+                $main.append(body);
+            });
+        });
+    });
+</script>
+</html>
