@@ -85,6 +85,7 @@ std::string serialization::to_json(model::Followers followers) {
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
+
     d.AddMember("id", followers.id, allocator);
     d.AddMember("author", followers.author, allocator);
     d.AddMember("addresser", followers.addresser, allocator);
@@ -109,6 +110,19 @@ std::string serialization::to_json(std::vector<model::Tweet> tweetVector) {
     return str;
 }
 
+std::string serialization::to_json(std::vector<model::Comment> comments) {
+    std::string str = "{\"comments\" :[";  // + "," + "]}";
+    while (!comments.empty()) {
+        str = str + serialization::to_json(comments.back());
+        if (comments.size() > 1) {
+            str = str + ",";
+        }
+        comments.pop_back();
+    }
+    str = str + "]}";
+    return str;
+}
+
 std::string serialization::to_json(std::vector<model::User_pr> tweetVector) {
     std::string str = "{\"friends\" :[";  // + "," + "]}";
     while (!tweetVector.empty()) {
@@ -126,52 +140,17 @@ std::string serialization::to_json(model::Comment comment) {
     Document d;
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+    std::string time = date::format(
+            "%FT%TZ", date::floor<std::chrono::seconds>(comment.create_date));
 
     d.AddMember("id", comment.id, allocator);
     d.AddMember("body", Value().SetString(StringRef(comment.body.c_str())),
                 allocator);
     d.AddMember("author", comment.author, allocator);
-    d.AddMember("create_date",
-                Value().SetString(StringRef(comment.create_date.c_str())),
+    d.AddMember("create_date", Value().SetString(StringRef(time.c_str())),
                 allocator);
     d.AddMember("comment_for", comment.comment_for, allocator);
     d.AddMember("rating", comment.rating, allocator);
-
-    StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
-    d.Accept(writer);
-
-    return buffer.GetString();
-}
-
-std::string serialization::to_json(model::Comment* comment, int number) {
-    Document d;
-    d.SetObject();
-    rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
-    char table[6][32] = {"id",          "body",        "author",
-                         "create_date", "comment_for", "rating"};
-    for (int i = 0; i <= number; i++) {
-        for (int j = 0; j < 6; j++) {
-            char c[16];
-            sprintf(c, "%d", i + 1);
-            strcat(table[j], c);
-        }
-        d.AddMember(Value().SetString(StringRef(table[0])), comment[i].id,
-                    allocator);
-        d.AddMember(Value().SetString(StringRef(table[1])),
-                    Value().SetString(StringRef(comment[i].body.c_str())),
-                    allocator);
-        d.AddMember(Value().SetString(StringRef(table[2])), comment[i].author,
-                    allocator);
-        d.AddMember(
-            Value().SetString(StringRef(table[3])),
-            Value().SetString(StringRef(comment[i].create_date.c_str())),
-            allocator);
-        d.AddMember(Value().SetString(StringRef(table[4])),
-                    comment[i].comment_for, allocator);
-        d.AddMember(Value().SetString(StringRef(table[5])), comment[i].rating,
-                    allocator);
-    }
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);

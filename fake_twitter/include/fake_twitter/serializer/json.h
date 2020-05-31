@@ -28,6 +28,7 @@ std::string to_json(const model::User_pr& user);
 std::string to_json(const utils::Session& session);
 std::string to_json(std::vector<model::Tweet> tweetVector);
 std::string to_json(std::vector<model::User_pr> tweetVector);
+std::string to_json(std::vector<model::Comment> comments);
 std::string to_json(model::Followers followers);
 std::string to_json(const model::Tweet& tweet);
 std::string to_json(model::Followers followers);

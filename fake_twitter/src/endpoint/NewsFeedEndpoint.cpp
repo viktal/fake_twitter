@@ -44,12 +44,16 @@ NewsFeedEndpoint::NewsFeedEndpoint(
 void NewsFeedEndpoint::showUserBoard(const Pistache::Http::Request& request,
                                      Pistache::Http::ResponseWriter response) {
     using fake_twitter::sqlpp_models::TabTweets;
-    auto id_optional = request.query().get("id");
-    if (id_optional.isEmpty()) {
-        response.send(Pistache::Http::Code::Bad_Request, "No id parameter");
+    response.setMime(MIME(Text, Plain));
+
+    if (!request.cookies().has("session")) {
+        response.send(Pistache::Http::Code::Unauthorized,
+                      "User in unauthorized");
         return;
     }
-    auto id = std::stol(id_optional.get());
+    auto id = serialization::from_json<utils::Session>(
+            request.cookies().get("session").value)
+            .user_id;
     std::vector<model::Tweet> tweetVector =
         newsFeedRepository->getUserBoard(id);
     if (tweetVector.empty()) {
@@ -57,8 +61,7 @@ void NewsFeedEndpoint::showUserBoard(const Pistache::Http::Request& request,
                       "You have no tweets yet ");
         return;
     }
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        MIME(Application, Json));
+    response.setMime(MIME(Application, Json));
     response.send(Pistache::Http::Code::Ok,
                   serialization::to_json(tweetVector));
 }

@@ -1,9 +1,27 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>FakeTwitter</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+          crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
 </head>
+<style>
+    .question {
+        float: left; /* Обтекание по правому краю */
+        padding: 10px; /* Поля вокруг текста */
+        margin-left: 15%; /* Отступ справа */
+        margin-top: 40px;
+        width: 40%; /* Ширина блока */
+        outline: 2px solid #000000;
+        clear: both;
+    }
+</style>
 <body>
 <div id="main">
     Username: <input type="text" id="username" size="20"><br>
@@ -38,11 +56,22 @@
             console.log(data);
             data["tweets"].forEach(function (tweet, index) {
                 var body = `
-                <div>
-                Author: ${tweet.author}(rating ${tweet.rating}, retweered ${tweet.retweets})<br>
-                    Created at: ${tweet.create_date}<br>
-                    Body: ${tweet.body}</p>
-                </div> <br>
+       <div class="question">
+      <div class="container mt-2">
+        <div class="media">
+          <div class="media-body">
+            ${tweet.body}
+          </div>
+        </div>
+          <div class="mt-2"><a href="#" class="badge badge-success">👍${tweet.rating}</a>
+          <div class="mt-2"><a href="#" class="badge badge-secondary]">retweets: ${tweet.retweets}</a>
+            <a href="{% url 'question' qid=question.id %}" class="ml-3"></a>
+              <div class="mr-3"></div>
+              Автор:<a href="#" class="ml-3 mr-5">${tweet.author}</a></div>
+            <small><p class="text-secondary mt-2">${tweet.create_date}</p></small>
+          </div>
+      </div>
+    </div>
             `;
                 $main.append(body);
             });

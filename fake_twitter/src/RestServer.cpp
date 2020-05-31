@@ -38,6 +38,8 @@ void RestServer::setupRoutes() {
         Routes::bind(&endpoints::CommentsEndpoint::show, commentsEndpoint));
     Post(router, "/0.0/CommentCreate/create",
          Routes::bind(&endpoints::CommentsEndpoint::create, commentsEndpoint));
+    Get(router, "/0.0/CommentsForTweet/show",
+         Routes::bind(&endpoints::CommentsEndpoint::showCommentsForTweet, commentsEndpoint));
     Put(router, "/0.0/CommentRaseLikes/update",
         Routes::bind(&endpoints::CommentsEndpoint::RaseLikes,
                      commentsEndpoint));
