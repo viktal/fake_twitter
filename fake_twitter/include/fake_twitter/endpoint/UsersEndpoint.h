@@ -31,7 +31,7 @@ public:
               Pistache::Http::ResponseWriter response);
 
     void showFollow(const Pistache::Rest::Request& request,
-                         Pistache::Http::ResponseWriter response);
+                    Pistache::Http::ResponseWriter response);
 
     void follow(const Pistache::Rest::Request& request,
                 Pistache::Http::ResponseWriter response);

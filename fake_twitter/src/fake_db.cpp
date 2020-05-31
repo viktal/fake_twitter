@@ -45,20 +45,20 @@ int main() {
         auto password = std::to_string(i);
         auto user = fake_twitter::fake::user::object(i, password, password);
         db(insert_into(tabUsers).set(
-                tabUsers.name = user.name, tabUsers.username = user.username,
-                tabUsers.password_hash = user.password_hash,
-                tabUsers.friends_count = 0, tabUsers.followers_count = 0,
-                tabUsers.salt = user.salt));
+            tabUsers.name = user.name, tabUsers.username = user.username,
+            tabUsers.password_hash = user.password_hash,
+            tabUsers.friends_count = 0, tabUsers.followers_count = 0,
+            tabUsers.salt = user.salt));
     }
 
     TabTweets tabTweets;
     for (int i = 0; i < tweetCount; i++) {
         auto tweet = fake_twitter::fake::tweet::object(userCount);
         db(insert_into(tabTweets).set(
-                tabTweets.body = tweet.body,
-                tabTweets.create_date = std::chrono::system_clock::now(),
-                tabTweets.author = tweet.author, tabTweets.retweets = 0,
-                tabTweets.rating = 0));
+            tabTweets.body = tweet.body,
+            tabTweets.create_date = std::chrono::system_clock::now(),
+            tabTweets.author = tweet.author, tabTweets.retweets = 0,
+            tabTweets.rating = 0));
     }
 
     TabFollower tabFollower;
@@ -69,14 +69,14 @@ int main() {
         int num2 = userSizeSampler(rnd);
         if (num1 != num2) {
             auto buf = db(select(all_of(tabFollower))
-                                  .from(tabFollower)
-                                  .where(tabFollower.author == num1 &&
-                                         tabFollower.addresser == num2));
+                              .from(tabFollower)
+                              .where(tabFollower.author == num1 &&
+                                     tabFollower.addresser == num2));
 
             if (buf.size() == 0) {
                 db(insert_into(tabFollower)
-                           .set(tabFollower.author = num1,
-                                tabFollower.addresser = num2));
+                       .set(tabFollower.author = num1,
+                            tabFollower.addresser = num2));
                 ++u;
             }
             // fake_twitter::repository::UsersRepository::follow(num1, num2);
@@ -86,13 +86,13 @@ int main() {
     TabComments tabComments;
     for (int i = 0; i < commentCount; i++) {
         auto comment =
-                fake_twitter::fake::comment::object(userCount, tweetCount);
+            fake_twitter::fake::comment::object(userCount, tweetCount);
         db(insert_into(tabComments)
-                   .set(tabComments.body = comment.body,
-                        tabComments.create_date = std::chrono::system_clock::now(),
-                        tabComments.author = comment.author,
-                        tabComments.comment_for = comment.comment_for,
-                        tabComments.rating = 0));
+               .set(tabComments.body = comment.body,
+                    tabComments.create_date = std::chrono::system_clock::now(),
+                    tabComments.author = comment.author,
+                    tabComments.comment_for = comment.comment_for,
+                    tabComments.rating = 0));
     }
 
     TabTags tabTags;
@@ -100,5 +100,5 @@ int main() {
 
     TabTagTweet tabTagTweet;
     db(insert_into(tabTagTweet)
-               .set(tabTagTweet.tweetID = 2, tabTagTweet.tagID = 1));
+           .set(tabTagTweet.tweetID = 2, tabTagTweet.tagID = 1));
 }

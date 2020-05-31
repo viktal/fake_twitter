@@ -14,7 +14,7 @@ struct User {
     size_t friends_count = 0;
 };
 
-struct User_pr{
+struct User_pr {
     PKey id;
     std::string name;
 };

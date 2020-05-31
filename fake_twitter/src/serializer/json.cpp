@@ -32,7 +32,8 @@ std::string serialization::to_json(const model::User_pr& user) {
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
     d.AddMember("id", user.id, allocator);
-    d.AddMember("name", Value().SetString(StringRef(user.name.c_str())),allocator);
+    d.AddMember("name", Value().SetString(StringRef(user.name.c_str())),
+                allocator);
 
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
