@@ -19,7 +19,7 @@ public:
     MOCK_METHOD(void, update,
                 (fake_twitter::PKey id, std::optional<std::string> name),
                 (override));
-    MOCK_METHOD(std::unique_ptr<fake_twitter::model::Followers>, getfollow,
+    MOCK_METHOD(std::vector<fake_twitter::model::User_pr>, getfollow,
                 (fake_twitter::PKey id), (override));
     MOCK_METHOD(bool, follow,
                 (fake_twitter::PKey author, fake_twitter::PKey addresser),
