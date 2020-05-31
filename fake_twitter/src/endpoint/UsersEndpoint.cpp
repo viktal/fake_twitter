@@ -108,17 +108,19 @@ void UsersEndpoint::drop(const Pistache::Rest::Request& request,
 
 void UsersEndpoint::showFollow(const Pistache::Rest::Request& request,
                                Pistache::Http::ResponseWriter response) {
-    auto id_optional = request.query().get("id");
-    if (id_optional.isEmpty()) {
-        response.send(Pistache::Http::Code::Bad_Request,
-                      "Not found one or more parameters");
+    response.setMime(MIME(Text, Plain));
+
+    if (!request.cookies().has("session")) {
+        response.send(Pistache::Http::Code::Unauthorized,
+                      "User in unauthorized");
         return;
     }
-    auto id = std::stol(id_optional.get());
+    auto id = serialization::from_json<utils::Session>(
+            request.cookies().get("session").value)
+            .user_id;
     std::vector<model::User_pr> followers = usersRepository->getfollow(id);
 
-    response.headers().add<Pistache::Http::Header::ContentType>(
-        MIME(Application, Json));
+    response.setMime(MIME(Application, Json));
     response.send(Pistache::Http::Code::Ok, serialization::to_json(followers));
 }
 
@@ -176,13 +178,13 @@ void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
 
     if (!user) {
         response.send(Pistache::Http::Code::Bad_Request,
-                      "Invalid username or password");
+                      "Invalid username");
         return;
     }
     auto password_hash = utils::make_password_hash(user->salt, password);
     if (password_hash != user->password_hash) {
         response.send(Pistache::Http::Code::Bad_Request,
-                      "Invalid username or password");
+                      "Invalid password");
         return;
     }
 

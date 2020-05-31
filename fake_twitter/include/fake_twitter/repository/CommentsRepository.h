@@ -5,6 +5,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <queue>
 
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"
@@ -24,6 +25,7 @@ public:
                                                    const int& comment_for);
     virtual bool Delete(PKey id);
     virtual std::unique_ptr<model::Comment> RaseLikes(PKey id);
+    virtual std::vector<model::Comment> CommentsForTweet(PKey id);
 
 private:
     std::shared_ptr<DBConnectionsPool> pool;
