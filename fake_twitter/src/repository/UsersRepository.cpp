@@ -17,8 +17,11 @@ std::unique_ptr<model::User> UsersRepository::get(PKey id) {
 
 std::unique_ptr<model::User> repository::UsersRepository::get(
     const std::string& username) {
+<<<<<<< HEAD
     //    std::optional<std::string> username_optional =
     //    std::optional<std::string>(username);
+=======
+>>>>>>> dev
     std::unique_ptr<model::User> user = get({}, {username});
     return user;
 }

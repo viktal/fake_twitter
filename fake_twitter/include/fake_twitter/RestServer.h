@@ -21,6 +21,8 @@ public:
     void serve();
     void serveThreaded();
     void shutdown();
+    void fakeshow(const Pistache::Rest::Request& request,
+                  Pistache::Http::ResponseWriter response);
 
 private:
     void setupRoutes();

@@ -26,14 +26,9 @@ protected:
 };
 
 TEST_F(UsersEndpointTest, Get) {
-    // Setup routes
     Rest::Routes::Get(router, "/show",
                       Rest::Routes::bind(&UsersEndpoint::show, usersEndpoint));
     serveThreaded();
-
-    // Invalid user ID
-    // Note: Unique ptr is a move-only object, to avoid headache with gmock and
-    // compiler, it is better to use lambda here
     EXPECT_CALL(*mockUsersRepository, get(1)).WillOnce([]() {
         return nullptr;
     });

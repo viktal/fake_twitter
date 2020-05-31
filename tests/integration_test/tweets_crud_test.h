@@ -95,6 +95,5 @@ void drop_tweets(Http::Client& client, std::vector<WorkloadInfo> credentials,
             responses.push_back(std::move(response));
         }
     }
-
     awaitall(responses);
 }

@@ -7,6 +7,8 @@ using namespace Pistache::Rest;
 void RestServer::setupRoutes() {
     using namespace Pistache::Rest::Routes;
 
+    Get(router, "/fakeshow", Routes::bind(&RestServer::fakeshow, this));
+
     Get(router, "/0.0/users/show",
         Routes::bind(&endpoints::UsersEndpoint::show, usersEndpoint));
     Post(router, "/0.0/users/create",
@@ -30,8 +32,7 @@ void RestServer::setupRoutes() {
     Delete(router, "/0.0/users/unfollow",
            Routes::bind(&endpoints::UsersEndpoint::unfollow, usersEndpoint));
     Get(router, "/0.0/followers/show",
-        Routes::bind(&endpoints::UsersEndpoint::showFollow,
-                     usersEndpoint));
+        Routes::bind(&endpoints::UsersEndpoint::showFollow, usersEndpoint));
 
     Get(router, "/0.0/comments/show.json",
         Routes::bind(&endpoints::CommentsEndpoint::show, commentsEndpoint));
@@ -116,3 +117,7 @@ void RestServer::serve() { httpEndpoint->serve(); }
 void RestServer::serveThreaded() { httpEndpoint->serveThreaded(); }
 
 void RestServer::shutdown() { httpEndpoint->shutdown(); }
+void RestServer::fakeshow(const Request& request,
+                          Pistache::Http::ResponseWriter response) {
+    Http::serveFile(response, "fakeshow.html");
+}

@@ -2,7 +2,6 @@
 #include "fake_twitter/serializer/json.h"
 #include "gtest/gtest.h"
 
-// using namespace Pistache;
 using namespace fake_twitter;
 
 TEST(test_serialiser, json_user) {
