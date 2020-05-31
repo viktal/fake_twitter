@@ -194,7 +194,11 @@ void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
     }
 
     auto session = serialization::to_json(utils::Session{user->id});
-    response.cookies().add(Pistache::Http::Cookie("session", session));
+    auto cookie = Pistache::Http::Cookie("session", session);
+    cookie.path = Pistache::types::Some<std::string>("/");
+    cookie.ext["SameSite"] = "Strict";
+    response.cookies().add(cookie);
 
-    response.send(Pistache::Http::Code::Ok, "user is authorized");
+    response.setMime(MIME(Text, Plain));
+    response.send(Pistache::Http::Code::Ok, "User is authorized");
 }

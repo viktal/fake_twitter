@@ -27,6 +27,7 @@ add_executable(app src/app.cpp)
 target_compile_features(app PRIVATE cxx_std_17)
 #target_compile_options(app PRIVATE -fconcepts)
 target_link_libraries(app PRIVATE fake_twitter)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/fakeshow.html ${CMAKE_CURRENT_BINARY_DIR}/fakeshow.html COPYONLY)
 
 add_executable(fake_db src/fake_db.cpp)
 target_compile_features(fake_db PRIVATE cxx_std_17)

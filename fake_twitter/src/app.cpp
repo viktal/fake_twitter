@@ -14,15 +14,7 @@ int main(int argc, char* argv[]) {
     auto opts = Http::Endpoint::options().threads(thr).flags(
         Tcp::Options::ReusePort | Tcp::Options::ReuseAddr);
 
-    //    cout << "Cores = " << hardware_concurrency() << endl;
-    //    cout << "Using " << thr << " threads" << endl;
     std::cout << "Start server" << std::endl;
-
-    //    auto config =
-    //    std::make_shared<sqlpp::postgresql::connection_config>(); config->host
-    //    = "127.0.0.1"; config->user = "twituser"; config->password = "123";
-    //    config->dbname = "twitdb";
-    //    config->debug = true;
 
     sqlpp::postgresql::connection_config config;
     config.host = "127.0.0.1";
