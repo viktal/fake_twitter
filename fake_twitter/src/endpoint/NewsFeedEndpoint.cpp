@@ -52,8 +52,8 @@ void NewsFeedEndpoint::showUserBoard(const Pistache::Http::Request& request,
         return;
     }
     auto id = serialization::from_json<utils::Session>(
-            request.cookies().get("session").value)
-            .user_id;
+                  request.cookies().get("session").value)
+                  .user_id;
     std::vector<model::Tweet> tweetVector =
         newsFeedRepository->getUserBoard(id);
     if (tweetVector.empty()) {

@@ -85,7 +85,6 @@ std::string serialization::to_json(model::Followers followers) {
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
 
-
     d.AddMember("id", followers.id, allocator);
     d.AddMember("author", followers.author, allocator);
     d.AddMember("addresser", followers.addresser, allocator);
@@ -141,7 +140,7 @@ std::string serialization::to_json(model::Comment comment) {
     d.SetObject();
     rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
     std::string time = date::format(
-            "%FT%TZ", date::floor<std::chrono::seconds>(comment.create_date));
+        "%FT%TZ", date::floor<std::chrono::seconds>(comment.create_date));
 
     d.AddMember("id", comment.id, allocator);
     d.AddMember("body", Value().SetString(StringRef(comment.body.c_str())),

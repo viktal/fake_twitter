@@ -4,8 +4,8 @@
 
 #include <memory>
 #include <optional>
-#include <utility>
 #include <queue>
+#include <utility>
 
 #include "fake_twitter/model/Comment.h"
 #include "fake_twitter/repository/DBConnectionsPool.h"

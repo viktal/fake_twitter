@@ -85,8 +85,8 @@ int main() {
 
     TabComments tabComments;
     for (int i = 0; i < commentCount; i++) {
-        auto comment =
-            fake_twitter::fake::tweet_comment::object_comment(userCount, tweetCount);
+        auto comment = fake_twitter::fake::tweet_comment::object_comment(
+            userCount, tweetCount);
         db(insert_into(tabComments)
                .set(tabComments.body = comment.body,
                     tabComments.create_date = std::chrono::system_clock::now(),
@@ -94,31 +94,30 @@ int main() {
                     tabComments.comment_for = comment.comment_for,
                     tabComments.rating = 0));
     }
-    
+
     TabLikes tabLikes;
     int us;
     while (us <= userCount * tweetCount / 2) {
         static std::uniform_int_distribution<int> userSizeSampler(1, userCount);
-        static std::uniform_int_distribution<int> tweetSizeSampler(1, userCount);
+        static std::uniform_int_distribution<int> tweetSizeSampler(1,
+                                                                   userCount);
         int num1 = userSizeSampler(rnd);
         int num2 = tweetSizeSampler(rnd);
-        auto buf = db(select(all_of(tabLikes))
-                              .from(tabLikes)
-                              .where(tabLikes.author == num1 &&
-                                     tabLikes.twit == num2));
+        auto buf =
+            db(select(all_of(tabLikes))
+                   .from(tabLikes)
+                   .where(tabLikes.author == num1 && tabLikes.twit == num2));
 
         if (buf.size() == 0) {
-            db(insert_into(tabLikes)
-                    .set(tabLikes.author = num1,
-                        tabLikes.twit = num2));
+            db(insert_into(tabLikes).set(tabLikes.author = num1,
+                                         tabLikes.twit = num2));
             db(update(tabTweets)
-                .set(tabTweets.rating = tabTweets.rating + 1)
-                .where(tabTweets.id == num2));
-                //++us;
-            }
-            ++us;
+                   .set(tabTweets.rating = tabTweets.rating + 1)
+                   .where(tabTweets.id == num2));
+            //++us;
+        }
+        ++us;
     }
-
 
     TabTags tabTags;
     db(insert_into(tabTags).set(tabTags.title = "dota"));
