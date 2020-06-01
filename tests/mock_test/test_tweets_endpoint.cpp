@@ -37,7 +37,7 @@ TEST_F(TweetsEndpointTest, Get) {
     ASSERT_EQ(Http::Code(response->status), Http::Code::Bad_Request);
 
     // Valid user ID
-    auto tweet = fake::tweet::object(1);
+    auto tweet = fake::tweet_comment::object_tweet(1);
     EXPECT_CALL(*mockTweetsRepository, get(2)).WillOnce([&]() {
         return std::make_unique<model::Tweet>(tweet);
     });

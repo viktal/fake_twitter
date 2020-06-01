@@ -21,7 +21,7 @@ void make_tweets(Http::Client& client, std::vector<WorkloadInfo>& credentials,
         std::uniform_int_distribution<int> tweetsCountSampler(0, N);
         auto count = tweetsCountSampler(rnd);
         for (int i = 0; i < count; i++) {
-            auto tweetToInsert = fake::tweet::object(20);
+            auto tweetToInsert = fake::tweet_comment::object_tweet(20);
             tweetToInsert.author = cred.user.id;
             auto posturl =
                 url + "author=" + std::to_string(tweetToInsert.author);
