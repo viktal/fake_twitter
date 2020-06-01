@@ -100,7 +100,7 @@ void TweetsEndpoint::create(const Pistache::Http::Request& request,
     }
 
     auto newTwit = tweetsRepository->create(author, body);
-
+    tweetsRepository->parse(newTwit.id, body);
     response.headers().add<Pistache::Http::Header::ContentType>(
         MIME(Application, Json));
     response.send(Pistache::Http::Code::Ok, serialization::to_json(newTwit));

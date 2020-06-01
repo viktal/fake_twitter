@@ -83,3 +83,39 @@ bool TweetsRepository::unlike(PKey author, PKey twit) {
                                    .where(tabTweets.id == author));
     return true;
 }
+
+void TweetsRepository::parse(const PKey& tweetID, const std::string& body) {
+    std::vector<std::string> tagvec;
+    std::string tag;
+    std::stringstream ss(body);
+    while(ss>>tag) {
+        if(tag[0] == '#') {
+            tagvec.push_back(tag.erase(0, 1));
+        }
+    }
+    for (std::vector<std::string>::const_iterator i = tagvec.begin(); i != tagvec.end(); ++i) {
+        //std::cout<<*i<<' ';
+        auto queryTag =
+            select(all_of(tabTags)).from(tabTags).where(tabTags.title == *i);
+        auto resultTag = pool->get_connection()(queryTag);
+        //const auto& row = resultTag.front();
+        //std::cout<<row.id<<"AAAAAAAAAAAAAa";
+        PKey tagID = 0;
+        if(!resultTag.empty()) {
+            const auto& row = resultTag.front();
+            tagID = row.id;
+        } else {
+            auto newid = pool->get_connection()(
+                sqlpp::postgresql::insert_into(tabTags)
+                .set(tabTags.title = *i)
+                .returning(tabTags.id));
+            tagID = newid.front().id.value();
+        }
+        auto newid = pool->get_connection()(
+        sqlpp::postgresql::insert_into(tabTagTweet)
+            .set(tabTagTweet.tweetID = tweetID, tabTagTweet.tagID = tagID)
+            .returning(tabTagTweet.id));
+    }
+    return;
+}
+
