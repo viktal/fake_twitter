@@ -116,8 +116,8 @@ void UsersEndpoint::showFollow(const Pistache::Rest::Request& request,
         return;
     }
     auto id = serialization::from_json<utils::Session>(
-            request.cookies().get("session").value)
-            .user_id;
+                  request.cookies().get("session").value)
+                  .user_id;
     std::vector<model::User_pr> followers = usersRepository->getfollow(id);
 
     response.setMime(MIME(Application, Json));
@@ -177,14 +177,12 @@ void UsersEndpoint::authorization(const Pistache::Rest::Request& request,
     auto user = usersRepository->get(username);
 
     if (!user) {
-        response.send(Pistache::Http::Code::Bad_Request,
-                      "Invalid username");
+        response.send(Pistache::Http::Code::Bad_Request, "Invalid username");
         return;
     }
     auto password_hash = utils::make_password_hash(user->salt, password);
     if (password_hash != user->password_hash) {
-        response.send(Pistache::Http::Code::Bad_Request,
-                      "Invalid password");
+        response.send(Pistache::Http::Code::Bad_Request, "Invalid password");
         return;
     }
 

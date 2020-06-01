@@ -219,7 +219,6 @@ model::Comment object_comment(int userCount, int tweetCount) {
 
 }  // namespace tweet_comment
 
-
 void create_postgresql_tables(sqlpp::postgresql::connection& db) {
     db.execute(
         "CREATE TABLE Users (\n"

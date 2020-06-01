@@ -90,8 +90,9 @@ void CommentsEndpoint::RaseLikes(const Pistache::Rest::Request& request,
         MIME(Application, Json));
     response.send(Pistache::Http::Code::Ok, serialization::to_json(*comment));
 }
-void CommentsEndpoint::showCommentsForTweet(const Pistache::Rest::Request
- &request, Pistache::Http::ResponseWriter response) {
+void CommentsEndpoint::showCommentsForTweet(
+    const Pistache::Rest::Request& request,
+    Pistache::Http::ResponseWriter response) {
     using fake_twitter::sqlpp_models::TabComments;
     response.setMime(MIME(Text, Plain));
 
@@ -102,14 +103,12 @@ void CommentsEndpoint::showCommentsForTweet(const Pistache::Rest::Request
     }
     auto id = std::stol(id_optional.get());
     std::vector<model::Comment> comments =
-            CommentsRepository->CommentsForTweet(id);
+        CommentsRepository->CommentsForTweet(id);
     if (comments.empty()) {
         response.send(Pistache::Http::Code::Bad_Request,
                       "no comments for this tweet");
         return;
     }
     response.setMime(MIME(Application, Json));
-    response.send(Pistache::Http::Code::Ok,
-                  serialization::to_json(comments));
- }
-
+    response.send(Pistache::Http::Code::Ok, serialization::to_json(comments));
+}
