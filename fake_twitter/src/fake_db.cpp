@@ -77,6 +77,13 @@ int main() {
                 db(insert_into(tabFollower)
                        .set(tabFollower.author = num1,
                             tabFollower.addresser = num2));
+                
+                db(update(tabUsers)
+                .set(tabUsers.friends_count = tabUsers.friends_count + 1)
+                .where(tabUsers.id == num1));
+                db(update(tabUsers)
+                .set(tabUsers.followers_count = tabUsers.followers_count + 1)
+                .where(tabUsers.id == num2));
                 ++u;
             }
             // fake_twitter::repository::UsersRepository::follow(num1, num2);
@@ -96,7 +103,7 @@ int main() {
     }
 
     TabLikes tabLikes;
-    int us;
+    int us = 0;
     while (us <= userCount * tweetCount / 2) {
         static std::uniform_int_distribution<int> userSizeSampler(1, userCount);
         static std::uniform_int_distribution<int> tweetSizeSampler(1, userCount);
@@ -114,9 +121,9 @@ int main() {
             db(update(tabTweets)
                 .set(tabTweets.rating = tabTweets.rating + 1)
                 .where(tabTweets.id == num2));
-                //++us;
+                ++us;
             }
-            ++us;
+            //++us;
     }
 
     TabTags tabTags;

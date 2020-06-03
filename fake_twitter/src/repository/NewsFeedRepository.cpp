@@ -22,7 +22,8 @@ std::vector<model::Tweet> NewsFeedRepository::get(PKey id) {
         while (!resultTweet.empty()) {
             auto& firstTweet = resultTweet.front();
             model::Tweet t = {firstTweet.id.value(), firstTweet.body.value(),
-                              firstTweet.author.value()};
+                              firstTweet.author.value(), std::chrono::time_point_cast<std::chrono::seconds>(
+                         firstTweet.create_date.value()), firstTweet.rating.value()};
             tweet_vector.push_back(t);
             resultTweet.pop_front();
         }
